@@ -5,6 +5,8 @@ float FLOOR_HEIGHT = 30;
 float DIE_CONTROL_MAX_VELOCITY = 2500;
 
 Die die = new Die();
+PVInstance focus;
+PVInstance camera = new PVInstance();
 
 void setup() {
   size(750, 750, P3D);
@@ -15,7 +17,7 @@ void setup() {
 
 int old = -1;
 void draw() {
-  mouseInput();
+  handleInput();
   if (old == -1) {
     old = millis();
   }
@@ -24,14 +26,11 @@ void draw() {
   render();
 }
 
-void mouseInput() {
+void handleInput() {
   if (mousePressed == true) {
-    //rotation.x = radians((float)Math.random() * 360);
-    //rotation.y = radians((float)Math.random() * 360);
-    //rotation.z = radians((float)Math.random() * 360);
     die.rotation.x += 0.1;
-    die.rotation.y += 0.1;
-    die.rotation.z += 0.1;
+    //die.rotation.y += 0.1;
+    //die.rotation.z += 0.1;
     
     Vector3 velocity = new Vector3(mouseX - die.position.x, mouseY - die.position.y, 0).multiply(15);
     if (velocity.magnitude() > DIE_CONTROL_MAX_VELOCITY) {
@@ -48,18 +47,6 @@ void physicsStep(float deltaTime) {
   
   float boundRadius = die.size.average() / 2;
   
-  if (die.position.x < boundRadius) {
-    die.position.x = boundRadius;
-    die.velocity.x *= -0.5;
-  }
-  if (die.position.x > width - boundRadius) {
-    die.position.x = width - boundRadius;
-    die.velocity.x *= -0.5;
-  }
-  if (die.position.y < boundRadius) {
-    die.position.y = boundRadius;
-    die.velocity.y *= -0.5;
-  }
   if (die.position.y >= height - FLOOR_HEIGHT - boundRadius) {
     if (die.velocity.y < GRAVITY * deltaTime + 5) {
       Vector3 error = die.rotation.divide(HALF_PI).round().multiply(HALF_PI).subtract(die.rotation);
@@ -82,9 +69,16 @@ void render() {
   noFill();
   background(135, 206, 235);
   lights();
+  updateCamera();
   drawGround();
   drawShadow(die.position);
   drawDice(die.position, die.rotation);
+}
+
+void updateCamera() {
+  Vector3 center = new Vector3(camera.position.x + width / 2, camera.position.y + height / 2, camera.position.z);
+  camera.rotation = getLookVector(center, die.position).multiply(PI);
+  //rotateWorld(camera.rotation);
 }
 
 void drawGround() {
@@ -92,8 +86,8 @@ void drawGround() {
   fill(37, 129, 57);
   stroke(0, 0, 0);
   strokeWeight(8);
-  translate(width / 2, height - FLOOR_HEIGHT + 32, 0);
-  box(width * 2, 1, height);
+  translateRelative(new Vector3(0, height - FLOOR_HEIGHT + 16, 0));
+  box(width * 12, 1, height * 12);
   popMatrix();
 }
 
@@ -106,7 +100,7 @@ void drawShadow(Vector3 position) {
   pushMatrix();
   fill(50, 50, 50, shadowSize);
   noStroke();
-  translate(position.x, height - FLOOR_HEIGHT - 0.01, position.z);
+  translateWorld(new Vector3(position.x, height - FLOOR_HEIGHT - 0.01 + 8, position.z));
   rotateX(HALF_PI);
   ellipse(0, 0, shadowSize, shadowSize);
   popMatrix();
@@ -117,17 +111,22 @@ void drawDice(Vector3 position, Vector3 rotation) {
   fill(255, 255, 255);
   stroke(0, 0, 0);
   strokeWeight(4);
-  translateVector(position);
-  rotateVector(rotation);
+  translateWorld(position);
+  rotateWorld(rotation);
   boxVector(die.size);
   popMatrix();
 }
 
 // utility functions
-void translateVector(Vector3 translation) {
+void translateWorld(Vector3 translation) {
+  translation = translation.subtract(camera.position);
+  PMatrix3D matrix = new PMatrix3D();
   translate(translation.x, translation.y, translation.z);
 }
-void rotateVector(Vector3 rotation) {
+void translateRelative(Vector3 translation) {
+  translate(translation.x, translation.y, translation.z);
+}
+void rotateWorld(Vector3 rotation) {
   rotateX(rotation.x);
   rotateY(rotation.y);
   rotateZ(rotation.z);
@@ -135,13 +134,21 @@ void rotateVector(Vector3 rotation) {
 void boxVector(Vector3 size) {
   box(size.x, size.y, size.z);
 }
+Vector3 getLookVector(Vector3 vectorOne, Vector3 vectorTwo) {
+  Vector3 deltaVector = vectorTwo.subtract(vectorOne);
+  if (deltaVector.magnitude() == 0) {
+    return new Vector3(0, 0, -1);
+  }
+  return deltaVector.unit();
+}
+
 
 // utility classes
-abstract class PVInstance {
+class PVInstance {
   Vector3 position = new Vector3(0, 0, 0);
   Vector3 rotation = new Vector3(0, 0, 0);
 }
-abstract class PhysicsInstance extends PVInstance {
+class PhysicsInstance extends PVInstance {
   Vector3 velocity = new Vector3(0, 0, 0);
   Vector3 size = new Vector3(50, 50, 50);
   
