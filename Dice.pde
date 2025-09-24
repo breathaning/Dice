@@ -188,11 +188,11 @@ class Vector3 {
   }
   
   Vector3 unit() {
-    float magnitude = magnitude();
-    if (magnitude == 0) {
+    float magnitudeValue = magnitude();
+    if (magnitudeValue == 0) {
       return new Vector3(0, 0, 0);
     }
-    return this.divide(magnitude);
+    return this.divide(magnitudeValue);
   }
   
   Vector3 round() {
