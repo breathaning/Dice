@@ -99,7 +99,7 @@ void drawShadow(Vector3 position) {
   }
   pushMatrix();
   fill(50, 50, 50, shadowSize);
-  strokeWeight(0);
+  noStroke();
   translate(position.x, height - FLOOR_HEIGHT - 0.01, position.z);
   rotateX(HALF_PI);
   ellipse(0, 0, shadowSize, shadowSize);
