@@ -78,17 +78,23 @@ void physicsStep(float deltaTime) {
 
 // draw functions
 void render() {
-  background(100);
+  noStroke();
+  noFill();
+  background(135, 206, 235);
   lights();
-  pushMatrix();
-  fill(255);
-  stroke(0);
-  strokeWeight(2);
-  translate(width / 2, height - FLOOR_HEIGHT + 4, 0);
-  box(width * 2, 0, height);
-  popMatrix();
+  drawGround();
   drawShadow(die.position);
   drawDice(die.position, die.rotation);
+}
+
+void drawGround() {
+  pushMatrix();
+  fill(37, 129, 57);
+  stroke(0, 0, 0);
+  strokeWeight(8);
+  translate(width / 2, height - FLOOR_HEIGHT + 32, 0);
+  box(width * 2, 0, height);
+  popMatrix();
 }
 
 void drawShadow(Vector3 position) {
@@ -108,9 +114,9 @@ void drawShadow(Vector3 position) {
 
 void drawDice(Vector3 position, Vector3 rotation) {
   pushMatrix();
-  fill(255);
-  stroke(0);
-  strokeWeight(2);
+  fill(255, 255, 255);
+  stroke(0, 0, 0);
+  strokeWeight(4);
   translateVector(position);
   rotateVector(rotation);
   boxVector(die.size);
@@ -122,8 +128,8 @@ void translateVector(Vector3 translation) {
   translate(translation.x, translation.y, translation.z);
 }
 void rotateVector(Vector3 rotation) {
-  rotateY(rotation.y);
   rotateX(rotation.x);
+  rotateY(rotation.y);
   rotateZ(rotation.z);
 }
 void boxVector(Vector3 size) {
@@ -211,5 +217,3 @@ class Vector3 {
     return (float)Math.sqrt((x * x) + (y * y) + (z * z));
   }
 }
-
-
