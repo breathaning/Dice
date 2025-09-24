@@ -76,9 +76,7 @@ void render() {
 }
 
 void updateCamera() {
-  Vector3 center = new Vector3(camera.position.x + width / 2, camera.position.y + height / 2, camera.position.z);
-  camera.rotation = getLookVector(center, die.position).multiply(PI);
-  //rotateWorld(camera.rotation);
+  camera(width/2.0, height/2.0, (height/2.0) / tan(PI*30.0 / 180), die.position.x, die.position.y, die.position.z, 0, 1, 0);
 }
 
 void drawGround() {
@@ -86,8 +84,8 @@ void drawGround() {
   fill(37, 129, 57);
   stroke(0, 0, 0);
   strokeWeight(8);
-  translateRelative(new Vector3(0, height - FLOOR_HEIGHT + 16, 0));
-  box(width * 12, 1, height * 12);
+  translateWorld(new Vector3(camera.position.x, height - FLOOR_HEIGHT + 16, camera.position.z));
+  box(width * 8, 8, height * 8);
   popMatrix();
 }
 
@@ -119,11 +117,6 @@ void drawDice(Vector3 position, Vector3 rotation) {
 
 // utility functions
 void translateWorld(Vector3 translation) {
-  translation = translation.subtract(camera.position);
-  PMatrix3D matrix = new PMatrix3D();
-  translate(translation.x, translation.y, translation.z);
-}
-void translateRelative(Vector3 translation) {
   translate(translation.x, translation.y, translation.z);
 }
 void rotateWorld(Vector3 rotation) {
