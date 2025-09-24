@@ -93,7 +93,7 @@ void drawGround() {
   stroke(0, 0, 0);
   strokeWeight(8);
   translate(width / 2, height - FLOOR_HEIGHT + 32, 0);
-  box(width * 2, 0, height);
+  box(width * 2, 1, height);
   popMatrix();
 }
 
