@@ -5,15 +5,24 @@ float FLOOR_HEIGHT = 30;
 float DIE_CONTROL_MAX_VELOCITY = 2500;
 float DIE_STOP_SPEED_THRESHOLD = 0.1;
 
+int INITIAL_CANVAS_WIDTH = 750;
+int INITIAL_CANVAS_HEIGHT = 750;
+
 Die die = new Die();
 PVInstance focus;
 PVInstance cameraInstance = new PVInstance();
 
 PGraphics worldCanvas;
+PGraphics worldCanvasMain;
+PGraphics worldCanvasFullscreen;
+
+void settings() {
+  size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P2D);
+}
 
 void setup() {
-  size(750, 750, P2D);
-  worldCanvas = createGraphics(width, height, P3D);
+  worldCanvasMain = createGraphics(width, height, P3D);
+  worldCanvasFullscreen = createGraphics(displayWidth, displayHeight, P3D);
   frameRate(60);
   die.position.x = width / 2;
   die.position.y = die.size.magnitude();
@@ -76,7 +85,11 @@ void physicsStep(float deltaTime) {
 
 // draw functions
 void drawWorld() {
-  //worldCanvas.setSize(width, height);
+  if (width == INITIAL_CANVAS_WIDTH && height == INITIAL_CANVAS_HEIGHT) {
+    worldCanvas = worldCanvasMain;
+  } else {
+    worldCanvas = worldCanvasFullscreen;
+  }
   worldCanvas.beginDraw();
   updateCamera();
   worldCanvas.noLights();
