@@ -10,11 +10,9 @@ PVInstance focus;
 PVInstance cameraInstance = new PVInstance();
 
 PGraphics worldCanvas;
-PGraphics worldCanvasFullscreen;
 
 void setup() {
   size(750, 750, P2D);
-  worldCanvas = createGraphics(width, height, P3D);
   worldCanvas = createGraphics(width, height, P3D);
   frameRate(60);
   die.position.x = width / 2;
@@ -80,8 +78,8 @@ void physicsStep(float deltaTime) {
 void drawWorld() {
   //worldCanvas.setSize(width, height);
   worldCanvas.beginDraw();
-  worldCanvas.clear();
   updateCamera();
+  worldCanvas.noLights();
   worldCanvas.lights();
   worldCanvas.background(135, 206, 235);
   drawGround();
