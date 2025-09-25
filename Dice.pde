@@ -6,7 +6,7 @@ float DIE_CONTROL_MAX_VELOCITY = 2500;
 
 Die die = new Die();
 PVInstance focus;
-PVInstance camera = new PVInstance();
+PVInstance cameraInstance = new PVInstance();
 
 void setup() {
   size(750, 750, P3D);
@@ -84,7 +84,7 @@ void drawGround() {
   fill(37, 129, 57);
   stroke(0, 0, 0);
   strokeWeight(8);
-  translateWorld(new Vector3(camera.position.x, height - FLOOR_HEIGHT + 16, camera.position.z));
+  translateWorld(new Vector3(cameraInstance.position.x, height - FLOOR_HEIGHT + 16, cameraInstance.position.z));
   box(width * 8, 8, height * 8);
   popMatrix();
 }
