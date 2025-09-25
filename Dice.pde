@@ -3,6 +3,7 @@ float FRAME_INTERVAL = 1.0 / FRAME_RATE;
 int GRAVITY = 981;
 float FLOOR_HEIGHT = 30;
 float DIE_CONTROL_MAX_VELOCITY = 2500;
+float DIE_STOP_SPEED_THRESHOLD = 0.1;
 
 Die die = new Die();
 PVInstance focus;
@@ -47,14 +48,20 @@ void physicsStep(float deltaTime) {
   
   float boundRadius = die.size.average() / 2;
   
+  die.grounded = die.velocity.y < GRAVITY * deltaTime + 5;
   if (die.position.y >= height - FLOOR_HEIGHT - boundRadius) {
-    if (die.velocity.y < GRAVITY * deltaTime + 5) {
+    if (die.grounded) {
       Vector3 error = die.rotation.divide(HALF_PI).round().multiply(HALF_PI).subtract(die.rotation);
       float smooth = Math.max(Math.min(3, die.velocity.magnitude() / 10), 1.5);
       die.rotation = die.rotation.add(error.divide(smooth));
+      if (die.velocity.magnitude() < DIE_STOP_SPEED_THRESHOLD) {
+        die.velocity = new Vector3(0, 0, 0);
+      }
     }
-    if (die.velocity.y > 1) {
+    if (die.velocity.y > GRAVITY * deltaTime + 1) {
       die.velocity.y *= -0.3;
+    } else {
+      die.velocity.y = 0;
     }
     die.position.y = height - FLOOR_HEIGHT - boundRadius;
     die.velocity.x /= 1 + ((deltaTime / FRAME_INTERVAL) * 0.3);
@@ -76,7 +83,18 @@ void render() {
 }
 
 void updateCamera() {
-  camera(width/2.0, height/2.0, (height/2.0) / tan(PI*30.0 / 180), die.position.x, die.position.y, die.position.z, 0, 1, 0);
+  if (die.velocity.magnitude() == 0 && die.grounded) {
+    Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(millis() / 1000.0), 300 + 200 * (float)Math.sin(millis() / 1000.0), 1000 * (float)Math.cos(millis() / 1000.0));
+    cameraInstance.position = cameraInstance.position.add(die.position.subtract(getCameraWorldPosition(cameraInstance.position)).subtract(goalPosition).divide(10));
+  } else {
+    cameraInstance.position = cameraInstance.position.add(die.position.subtract(getCameraWorldPosition(cameraInstance.position)).subtract(die.velocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
+  }
+  Vector3 cameraWorldPosition = getCameraWorldPosition(cameraInstance.position);
+  camera(
+    cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z, 
+    die.position.x, die.position.y, die.position.z, 
+    0, 1, 0
+  );
 }
 
 void drawGround() {
@@ -85,7 +103,9 @@ void drawGround() {
   stroke(0, 0, 0);
   strokeWeight(8);
   translateWorld(new Vector3(cameraInstance.position.x, height - FLOOR_HEIGHT + 16, cameraInstance.position.z));
-  box(width * 8, 8, height * 8);
+  rotateX(radians(90));
+  float scale = Math.min(Math.max(width, height) * 12, 11000);
+  ellipse(0, 0, scale, scale);
   popMatrix();
 }
 
@@ -134,6 +154,13 @@ Vector3 getLookVector(Vector3 vectorOne, Vector3 vectorTwo) {
   }
   return deltaVector.unit();
 }
+Vector3 getCameraWorldPosition(Vector3 position) {
+  return new Vector3(
+    position.x + width / 2.0, 
+    position.y + height / 2.0, 
+    position.z + (height / 2.0) / tan(PI * 30.0 / 180)
+  );
+}
 
 
 // utility classes
@@ -150,6 +177,7 @@ class PhysicsInstance extends PVInstance {
   }
 }
 class Die extends PhysicsInstance {
+  boolean grounded = false;
   Die() {
     super();
   }
