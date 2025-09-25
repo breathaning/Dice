@@ -78,7 +78,7 @@ void physicsStep(float deltaTime) {
 
 // draw functions
 void drawWorld() {
-  worldCanvas.setSize(width, height);
+  //worldCanvas.setSize(width, height);
   worldCanvas.beginDraw();
   updateCamera();
   worldCanvas.lights();
@@ -145,7 +145,7 @@ void drawDice(Vector3 position, Vector3 rotation) {
 
 void drawUI() {
   pushMatrix();
-
+  //ellipse(width / 2, height / 2, 50, 50);
   popMatrix();
 }
 
