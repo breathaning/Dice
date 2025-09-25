@@ -15319,7 +15319,7 @@ module.exports = function setupParser(Processing, options) {
         uniformi("uIsDrawingText2d", programObject2D, "uIsDrawingText", false);
         vertexAttribPointer("vertex2d", programObject2D, "aVertex", 3, boxOutlineBuffer);
         disableVertexAttribPointer("aTextureCoord2d", programObject2D, "aTextureCoord");
-		curContext.lineWidth(lineWidth);
+		//curContext.lineWidth(lineWidth);
         curContext.drawArrays(curContext.LINES, 0, boxOutlineVerts.length / 3);
       }
     };
