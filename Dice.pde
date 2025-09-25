@@ -80,6 +80,7 @@ void physicsStep(float deltaTime) {
 void drawWorld() {
   //worldCanvas.setSize(width, height);
   worldCanvas.beginDraw();
+  worldCanvas.clear();
   updateCamera();
   worldCanvas.lights();
   worldCanvas.background(135, 206, 235);
