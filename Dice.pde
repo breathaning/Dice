@@ -83,7 +83,7 @@ void render() {
 }
 
 void updateCamera() {
-  if (die.velocity.magnitude() == 0 && die.grounded) {
+  if (die.velocity.magnitude() <= DIE_STOP_SPEED_THRESHOLD && die.grounded) {
     Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(millis() / 1000.0), 300 + 200 * (float)Math.sin(millis() / 1000.0), 1000 * (float)Math.cos(millis() / 1000.0));
     cameraInstance.position = cameraInstance.position.add(die.position.subtract(getCameraWorldPosition(cameraInstance.position)).subtract(goalPosition).divide(10));
   } else {
