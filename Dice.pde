@@ -22,7 +22,12 @@ void settings() {
 
 void setup() {
   worldCanvasMain = createGraphics(width, height, P3D);
-  worldCanvasFullscreen = createGraphics(displayWidth, displayHeight, P3D);
+  try {
+    worldCanvasFullscreen = createGraphics(displayWidth, displayHeight, P3D);
+  } catch (Exception e) {
+    // unneeded to instantiate, just incase 
+    worldCanvasFullscreen = createGraphics(width, height, P3D);
+  }
   frameRate(60);
   die.position.x = width / 2;
   die.position.y = die.size.magnitude();
