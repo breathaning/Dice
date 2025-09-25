@@ -9815,6 +9815,7 @@ module.exports = function setupParser(Processing, options) {
     p.keyTyped        = noop;
     p.draw            = undef;
     p.setup           = undef;
+	p.settings        = undef;
 
     // Remapped vars
     p.__mousePressed  = false;
@@ -21566,6 +21567,9 @@ module.exports = function setupParser(Processing, options) {
           // pass a reference to the p instance for this sketch.
           curSketch.onLoad(processing);
 
+		  if (processing.settings) {
+			  processing.settings();
+		  }
           // Run void setup()
           if (processing.setup) {
             processing.setup();
