@@ -1,6 +1,6 @@
 int FRAME_RATE = 60;
 float FRAME_INTERVAL = 1.0 / FRAME_RATE;
-int GRAVITY = 981;
+float GRAVITY = 981;
 float FLOOR_HEIGHT = 30;
 float DIE_CONTROL_MAX_VELOCITY = 2500;
 float DIE_STOP_SPEED_THRESHOLD = 0.1;
@@ -9,8 +9,13 @@ Die die = new Die();
 PVInstance focus;
 PVInstance cameraInstance = new PVInstance();
 
+PGraphics worldCanvas;
+PGraphics worldCanvasFullscreen;
+
 void setup() {
-  size(750, 750, P3D);
+  size(750, 750, P2D);
+  worldCanvas = createGraphics(width, height, P3D);
+  worldCanvas = createGraphics(width, height, P3D);
   frameRate(60);
   die.position.x = width / 2;
   die.position.y = die.size.magnitude();
@@ -24,7 +29,8 @@ void draw() {
   }
   physicsStep((millis() - old) / 1000.0);
   old = millis();
-  render();
+  drawWorld();
+  drawUI();
 }
 
 void handleInput() {
@@ -71,15 +77,17 @@ void physicsStep(float deltaTime) {
 }
 
 // draw functions
-void render() {
-  noStroke();
-  noFill();
-  background(135, 206, 235);
-  lights();
+void drawWorld() {
+  worldCanvas.setSize(width, height);
+  worldCanvas.beginDraw();
   updateCamera();
+  worldCanvas.lights();
+  worldCanvas.background(135, 206, 235);
   drawGround();
   drawShadow(die.position);
   drawDice(die.position, die.rotation);
+  worldCanvas.endDraw();
+  image(worldCanvas, 0, 0);
 }
 
 void updateCamera() {
@@ -90,7 +98,7 @@ void updateCamera() {
     cameraInstance.position = cameraInstance.position.add(die.position.subtract(getCameraWorldPosition(cameraInstance.position)).subtract(die.velocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
   }
   Vector3 cameraWorldPosition = getCameraWorldPosition(cameraInstance.position);
-  camera(
+  worldCanvas.camera(
     cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z, 
     die.position.x, die.position.y, die.position.z, 
     0, 1, 0
@@ -98,15 +106,15 @@ void updateCamera() {
 }
 
 void drawGround() {
-  pushMatrix();
-  fill(37, 129, 57);
-  stroke(0, 0, 0);
-  strokeWeight(8);
+  worldCanvas.pushMatrix();
+  worldCanvas.fill(37, 129, 57);
+  worldCanvas.stroke(0, 0, 0);
+  worldCanvas.strokeWeight(8);
   translateWorld(new Vector3(cameraInstance.position.x, height - FLOOR_HEIGHT + 16, cameraInstance.position.z));
-  rotateX(radians(90));
+  worldCanvas.rotateX(radians(90));
   float scale = Math.min(Math.max(width, height) * 12, 11000);
-  ellipse(0, 0, scale, scale);
-  popMatrix();
+  worldCanvas.ellipse(0, 0, scale, scale);
+  worldCanvas.popMatrix();
 }
 
 void drawShadow(Vector3 position) {
@@ -115,38 +123,47 @@ void drawShadow(Vector3 position) {
   if (shadowSize <= 0) {
     return;
   }
-  pushMatrix();
-  fill(50, 50, 50, shadowSize);
-  noStroke();
-  translateWorld(new Vector3(position.x, height - FLOOR_HEIGHT - 0.01 + 8, position.z));
-  rotateX(HALF_PI);
-  ellipse(0, 0, shadowSize, shadowSize);
-  popMatrix();
+  worldCanvas.pushMatrix();
+  worldCanvas.fill(50, 50, 50, shadowSize);
+  worldCanvas.noStroke();
+  translateWorld(new Vector3(position.x, height - FLOOR_HEIGHT - 0.01 + 4, position.z));
+  worldCanvas.rotateX(HALF_PI);
+  worldCanvas.ellipse(0, 0, shadowSize, shadowSize);
+  worldCanvas.popMatrix();
 }
 
 void drawDice(Vector3 position, Vector3 rotation) {
-  pushMatrix();
-  fill(255, 255, 255);
-  stroke(0, 0, 0);
-  strokeWeight(4);
+  worldCanvas.pushMatrix();
+  worldCanvas.fill(255, 255, 255);
+  worldCanvas.stroke(0, 0, 0);
+  worldCanvas.strokeWeight(4);
   translateWorld(position);
   rotateWorld(rotation);
-  boxVector(die.size);
+  boxWorld(die.size);
+  worldCanvas.popMatrix();
+}
+
+void drawUI() {
+  pushMatrix();
+
   popMatrix();
 }
 
 // utility functions
 void translateWorld(Vector3 translation) {
-  translate(translation.x, translation.y, translation.z);
+  worldCanvas.translate(translation.x, translation.y, translation.z);
 }
+
 void rotateWorld(Vector3 rotation) {
-  rotateX(rotation.x);
-  rotateY(rotation.y);
-  rotateZ(rotation.z);
+  worldCanvas.rotateX(rotation.x);
+  worldCanvas.rotateY(rotation.y);
+  worldCanvas.rotateZ(rotation.z);
 }
-void boxVector(Vector3 size) {
-  box(size.x, size.y, size.z);
+
+void boxWorld(Vector3 size) {
+  worldCanvas.box(size.x, size.y, size.z);
 }
+
 Vector3 getLookVector(Vector3 vectorOne, Vector3 vectorTwo) {
   Vector3 deltaVector = vectorTwo.subtract(vectorOne);
   if (deltaVector.magnitude() == 0) {
@@ -154,6 +171,7 @@ Vector3 getLookVector(Vector3 vectorOne, Vector3 vectorTwo) {
   }
   return deltaVector.unit();
 }
+
 Vector3 getCameraWorldPosition(Vector3 position) {
   return new Vector3(
     position.x + width / 2.0, 
