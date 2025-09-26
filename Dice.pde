@@ -85,21 +85,11 @@ void physicsStep(float deltaTime) {
 void drawWorld() {
   hint(ENABLE_DEPTH_TEST);
   updateCamera();
-  noLights();
   lights();
   background(135, 206, 235);
   drawGround();
   drawShadow(die.position);
   drawDice(die.position, die.rotation);
-  //PImage worldRenderImage = worldCanvas.get();
-  //if (FLAG_BROWSER) {
-  //  pushMatrix();
-  //  scale(1, -1);
-  //  image(worldRenderImage, 0, -height);
-  //  popMatrix();
-  //} else {
-  //  image(worldRenderImage, 0, 0);
-  //}
 }
 
 void updateCamera() {
@@ -156,7 +146,11 @@ void drawDice(Vector3 position, Vector3 rotation) {
 
 void drawUI() {
   hint(DISABLE_DEPTH_TEST);
+  camera();
+  noLights();
+  pushMatrix();
   ellipse(width, height / 2, 50, 50);
+  popMatrix();
   //image(uiCanvas.get(), 0, 0);
 }
 
