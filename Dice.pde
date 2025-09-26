@@ -7,16 +7,12 @@ float FLOOR_HEIGHT = 30;
 float DIE_CONTROL_MAX_VELOCITY = 2500;
 float DIE_STOP_SPEED_THRESHOLD = 0.1;
 
-boolean FLAG_BROWSER = false;
-
 int INITIAL_CANVAS_WIDTH = 750;
 int INITIAL_CANVAS_HEIGHT = 750;
 
 Die die = new Die();
 PVInstance focus;
 PVInstance cameraInstance = new PVInstance();
-
-PGraphics uiCanvas;
 
 void settings() {
   size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P3D);
@@ -95,6 +91,7 @@ void physicsStep(float deltaTime) {
 
 // draw functions
 void drawWorld() {
+  hint(ENABLE_DEPTH_TEST);
   updateCamera();
   noLights();
   lights();
@@ -166,14 +163,8 @@ void drawDice(Vector3 position, Vector3 rotation) {
 }
 
 void drawUI() {
-  try {
-    uiCanvas.setSize(width, height);
-  } catch(Exception e) {
-    
-  }
-  uiCanvas.beginDraw();
-  uiCanvas.ellipse(width, height / 2, 50, 50);
-  uiCanvas.endDraw();
+  hint(DISABLE_DEPTH_TEST);
+  ellipse(width, height / 2, 50, 50);
   //image(uiCanvas.get(), 0, 0);
 }
 
