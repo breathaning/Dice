@@ -13859,7 +13859,6 @@ module.exports = function setupParser(Processing, options) {
 	  var dataArray = new Array(uBuff.length);
 	  var increment = w * 4;
 	  for (var i=0, ul=uBuff.length; i < ul; i += increment) {
-		  abc.push(ul - i);
 		  dataArray.push(...uBuff.slice(ul - i - increment, ul - i));
       }
 	  obj.data = new Uint8ClampedArray(dataArray);
