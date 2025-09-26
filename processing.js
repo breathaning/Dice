@@ -7039,17 +7039,18 @@
     };
     p.hint = function(which) {
       var curContext = drawing.$ensureContext();
-        try() {
+      try {
       if (which === 4) {
         curContext.disable(curContext.DEPTH_TEST);
         curContext.depthMask(false);
-        curContext.clear(curContext.DEPTH_BUFFER_BIT)
+        curContext.clear(curContext.DEPTH_BUFFER_BIT);
       } else if (which === -4) {
         curContext.enable(curContext.DEPTH_TEST);
-        curContext.depthMask(true)
+        curContext.depthMask(true);
       } else if (which === -1 || which === 2) renderSmooth = true;
-      else if (which === 1) renderSmooth = false
-        } catch(error) {}
+      else if (which === 1) renderSmooth = false;
+      } catch(error) {}
+
     };
     var backgroundHelper = function(arg1, arg2, arg3, arg4) {
       var obj;
