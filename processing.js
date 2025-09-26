@@ -13856,9 +13856,7 @@ module.exports = function setupParser(Processing, options) {
           obj = ctx.createImageData(w, h),
           uBuff = new Uint8Array(w * h * 4);
       curContext.readPixels(x, y, w, h, curContext.RGBA, curContext.UNSIGNED_BYTE, uBuff);
-      for (var i=0, ul=uBuff.length, obj_data=obj.data; i < ul; i++) {
-        obj_data[i] = uBuff[(h - 1 - Math.floor(i / 4 / w)) * w * 4 + (i % (w * 4))];
-      }
+      obj.data = Array.from(uBuff);
       return obj;
     };
 
@@ -19539,7 +19537,7 @@ module.exports = function setupParser(Processing, options) {
           curContext.drawImage(htmlElement, 0, 0,
             htmlElement.width, htmlElement.height, bounds.x, bounds.y, bounds.w, bounds.h);
         } else {
-          var obj = img.imageData;
+          var obj = img.toImageData();
 
           // Tint the image
           if (curTint !== null) {
