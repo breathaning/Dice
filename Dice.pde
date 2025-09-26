@@ -211,7 +211,7 @@ class Die extends PhysicsInstance {
     boxWorld(this.size);
 
     int lift = 1;
-    int dotSize = size.average() / 10;
+    int dotSize = size.average() / 4;
     fill(0, 0, 0);
     noStroke();
     pushMatrix();
