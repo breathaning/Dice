@@ -112,8 +112,9 @@ void drawWorld() {
   PImage worldRenderImage = worldCanvas.get();
   if (FLAG_BROWSER) {
     pushMatrix();
-    scale(1.0, -1.0);
-    image(worldRenderImage, 0, -height);
+    scale(2.0, -2.0);
+    worldRenderImage.resize(width / 2, height / 2);
+    image(worldRenderImage, 0, -height / 2);
     popMatrix();
   } else {
     image(worldRenderImage, 0, 0);
