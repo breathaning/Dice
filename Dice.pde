@@ -102,7 +102,7 @@ void drawWorld() {
   drawGround();
   drawShadow(die.position);
   drawDice(die.position, die.rotation);
-  //PImage worldRenderImage = get();
+  //PImage worldRenderImage = worldCanvas.get();
   //if (FLAG_BROWSER) {
   //  pushMatrix();
   //  scale(1, -1);
@@ -174,7 +174,7 @@ void drawUI() {
   uiCanvas.beginDraw();
   uiCanvas.ellipse(width, height / 2, 50, 50);
   uiCanvas.endDraw();
-  image(uiCanvas.get(), 0, 0);
+  //image(uiCanvas.get(), 0, 0);
 }
 
 // utility functions
