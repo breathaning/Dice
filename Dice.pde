@@ -16,10 +16,10 @@ Die die = new Die();
 PVInstance focus;
 PVInstance cameraInstance = new PVInstance();
 
-PGraphics worldCanvas;
+PGraphics uiCanvas;
 
 void settings() {
-  size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P2D);
+  size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P3D);
   smooth(2);
   
   try {
@@ -31,8 +31,8 @@ void settings() {
 
 void setup() {
   frameRate(FRAME_RATE);
-  worldCanvas = createGraphics(width, height, P3D);
-  worldCanvas.smooth(4);
+  uiCanvas = createGraphics(width, height, P2D);
+  uiCanvas.smooth(4);
   
   die.position.x = width / 2;
   die.position.y = die.size.magnitude();
@@ -96,28 +96,26 @@ void physicsStep(float deltaTime) {
 // draw functions
 void drawWorld() {
   try {
-    worldCanvas.setSize(width, height);
+    setSize(width, height);
   } catch(Exception e) {
     
   }
-  worldCanvas.beginDraw();
   updateCamera();
-  worldCanvas.noLights();
-  worldCanvas.lights();
-  worldCanvas.background(135, 206, 235);
+  noLights();
+  lights();
+  background(135, 206, 235);
   drawGround();
   drawShadow(die.position);
   drawDice(die.position, die.rotation);
-  worldCanvas.endDraw();
-  PImage worldRenderImage = worldCanvas.get();
-  if (FLAG_BROWSER) {
-    pushMatrix();
-    scale(1, -1);
-    image(worldRenderImage, 0, -height);
-    popMatrix();
-  } else {
-    image(worldRenderImage, 0, 0);
-  }
+  //PImage worldRenderImage = get();
+  //if (FLAG_BROWSER) {
+  //  pushMatrix();
+  //  scale(1, -1);
+  //  image(worldRenderImage, 0, -height);
+  //  popMatrix();
+  //} else {
+  //  image(worldRenderImage, 0, 0);
+  //}
 }
 
 void updateCamera() {
@@ -127,7 +125,7 @@ void updateCamera() {
   } else {
     cameraInstance.position = cameraInstance.position.add(die.position.subtract(cameraInstance.position).subtract(die.velocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
   }
-  worldCanvas.camera(
+  camera(
     cameraInstance.position.x - (width / 2.0), cameraInstance.position.y - (height / 2.0), cameraInstance.position.z - ((height / 2.0) / tan(PI * 30.0 / 180)),
     die.position.x, die.position.y, die.position.z,
     0, 1, 0
@@ -135,15 +133,15 @@ void updateCamera() {
 }
 
 void drawGround() {
-  worldCanvas.pushMatrix();
-  worldCanvas.fill(37, 129, 57);
-  worldCanvas.stroke(0, 0, 0);
-  worldCanvas.strokeWeight(12);
+  pushMatrix();
+  fill(37, 129, 57);
+  stroke(0, 0, 0);
+  strokeWeight(12);
   translateWorld(new Vector3(die.position.x, height - FLOOR_HEIGHT + 16, die.position.z));
-  worldCanvas.rotateX(radians(90));
+  rotateX(radians(90));
   float scale = Math.min(Math.max(width, height) * 12, 1000);
-  worldCanvas.ellipse(0, 0, scale, scale);
-  worldCanvas.popMatrix();
+  ellipse(0, 0, scale, scale);
+  popMatrix();
 }
 
 void drawShadow(Vector3 position) {
@@ -152,45 +150,46 @@ void drawShadow(Vector3 position) {
   if (shadowSize <= 0) {
     return;
   }
-  worldCanvas.pushMatrix();
-  worldCanvas.fill(50, 50, 50, shadowSize);
-  worldCanvas.noStroke();
+  pushMatrix();
+  fill(50, 50, 50, shadowSize);
+  noStroke();
   translateWorld(new Vector3(position.x, height - FLOOR_HEIGHT - 0.01 + 4, position.z));
-  worldCanvas.rotateX(HALF_PI);
-  worldCanvas.ellipse(0, 0, shadowSize, shadowSize);
-  worldCanvas.popMatrix();
+  rotateX(HALF_PI);
+  ellipse(0, 0, shadowSize, shadowSize);
+  popMatrix();
 }
 
 void drawDice(Vector3 position, Vector3 rotation) {
-  worldCanvas.pushMatrix();
-  worldCanvas.fill(255, 255, 255);
-  worldCanvas.stroke(0, 0, 0);
-  worldCanvas.strokeWeight(4);
+  pushMatrix();
+  fill(255, 255, 255);
+  stroke(0, 0, 0);
+  strokeWeight(4);
   translateWorld(position);
   rotateWorld(rotation);
   boxWorld(die.size);
-  worldCanvas.popMatrix();
+  popMatrix();
 }
 
 void drawUI() {
-  pushMatrix();
-  ellipse(width, height / 2, 50, 50);
-  popMatrix();
+  uiCanvas.beginDraw();
+  uiCanvas.ellipse(width, height / 2, 50, 50);
+  uiCanvas.endDraw();
+  image(uiCanvas, 0, 0);
 }
 
 // utility functions
 void translateWorld(Vector3 translation) {
-  worldCanvas.translate(translation.x, translation.y, translation.z);
+  translate(translation.x, translation.y, translation.z);
 }
 
 void rotateWorld(Vector3 rotation) {
-  worldCanvas.rotateX(rotation.x);
-  worldCanvas.rotateY(rotation.y);
-  worldCanvas.rotateZ(rotation.z);
+  rotateX(rotation.x);
+  rotateY(rotation.y);
+  rotateZ(rotation.z);
 }
 
 void boxWorld(Vector3 size) {
-  worldCanvas.box(size.x, size.y, size.z);
+  box(size.x, size.y, size.z);
 }
 
 Vector3 getLookVector(Vector3 vectorOne, Vector3 vectorTwo) {
