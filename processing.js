@@ -13861,7 +13861,7 @@ module.exports = function setupParser(Processing, options) {
 	  for (var i=0; i < h; i++) {
         reversedBuffer.push(uBuff.slice(i *  increment, (i + 1) * increment).reverse());
       }
-		console.log(uBuff);
+		console.log(reversedBuffer);
 	  obj.data.set(reversedBuffer);
       return obj;
     };
