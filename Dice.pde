@@ -38,7 +38,6 @@ void setup() {
 
 void renderHints(PGraphics canvas) {
   canvas.hint(ENABLE_OPENGL_4X_SMOOTH);
-  canvas.hint(ENABLE_STROKE_PERSPECTIVE);
 }
 
 int old = -1;
@@ -134,7 +133,7 @@ void drawGround() {
   worldCanvas.pushMatrix();
   worldCanvas.fill(37, 129, 57);
   worldCanvas.stroke(0, 0, 0);
-  worldCanvas.strokeWeight(8);
+  worldCanvas.strokeWeight(32);
   translateWorld(new Vector3(cameraInstance.position.x, height - FLOOR_HEIGHT + 16, cameraInstance.position.z));
   worldCanvas.rotateX(radians(90));
   float scale = Math.min(Math.max(width, height) * 12, 11000);
