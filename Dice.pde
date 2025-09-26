@@ -20,7 +20,7 @@ PGraphics worldCanvas;
 
 void settings() {
   size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P2D);
-  smooth(4);
+  smooth(2);
   
   try {
     Math.signum(0);
@@ -112,9 +112,8 @@ void drawWorld() {
   PImage worldRenderImage = worldCanvas.get();
   if (FLAG_BROWSER) {
     pushMatrix();
-    scale(2.0, -2.0);
-    worldRenderImage.resize(width / 2, height / 2);
-    image(worldRenderImage, 0, -height / 2);
+    scale(1, -1);
+    image(worldRenderImage, 0, -height);
     popMatrix();
   } else {
     image(worldRenderImage, 0, 0);
@@ -175,7 +174,7 @@ void drawDice(Vector3 position, Vector3 rotation) {
 
 void drawUI() {
   pushMatrix();
-  //ellipse(width, height / 2, 50, 50);
+  ellipse(width, height / 2, 50, 50);
   popMatrix();
 }
 
