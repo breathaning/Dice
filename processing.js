@@ -19529,7 +19529,7 @@ module.exports = function setupParser(Processing, options) {
 
         var bounds = imageModeConvert(x || 0, y || 0, w || img.width, h || img.height, arguments.length < 4);
         var fastImage = !!img.sourceImg && curTint === null;
-        if (fastImage) {
+        if (fastImage || true) {
           var htmlElement = img.sourceImg;
           if (img.__isDirty) {
             img.updatePixels();
