@@ -215,7 +215,7 @@ class Die extends PhysicsInstance {
     fill(0, 0, 0);
     noStroke();
     pushMatrix();
-    translate(0, 0, box.size / 2 + lift);
+    translate(0, 0, box.size.z / 2 + lift);
     ellipse(0, 0, size, size);
     pushMatrix();
   }
