@@ -13857,9 +13857,10 @@ module.exports = function setupParser(Processing, options) {
           uBuff = new Uint8Array(w * h * 4);
       curContext.readPixels(x, y, w, h, curContext.RGBA, curContext.UNSIGNED_BYTE, uBuff);
 		console.log(uBuff);
-      for (var i=0, ul=uBuff.length, obj_data=obj.data; i < ul; i++) {
-        obj_data[i] = uBuff[(h - 1 - Math.floor(i / 4 / w)) * w * 4 + (i % (w * 4))];
-      }
+      // for (var i=0, ul=uBuff.length, obj_data=obj.data; i < ul; i++) {
+      //   obj_data[i] = uBuff[(h - 1 - Math.floor(i / 4 / w)) * w * 4 + (i % (w * 4))];
+      // }
+		obj.data = uBuff;
 		console.log(obj);
       return obj;
     };
