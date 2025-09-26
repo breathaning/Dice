@@ -7038,7 +7038,7 @@
       if (p.imageData) drawing.$ensureContext().putImageData(p.imageData, 0, 0)
     };
     p.hint = function(which) {
-       var curContext = drawing.$ensureContext();
+      var curContext = drawing.$ensureContext();
       try {
       if (which === 4) {
         curContext.disable(curContext.DEPTH_TEST);
