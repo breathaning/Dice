@@ -85,7 +85,7 @@ void physicsStep(float deltaTime) {
 
 // draw functions
 void drawWorld() {
-  hint(ENABLE_DEPTH_TEST);
+  //hint(ENABLE_DEPTH_TEST);
   updateCamera();
   lights();
   background(135, 206, 235);
@@ -144,7 +144,7 @@ void drawInstances() {
 }
 
 void drawUI() {
-  hint(DISABLE_DEPTH_TEST);
+  //hint(DISABLE_DEPTH_TEST);
   camera();
   noLights();
   pushMatrix();
