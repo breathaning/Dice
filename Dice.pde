@@ -21,16 +21,26 @@ void settings() {
 }
 
 void setup() {
+  hint(ENABLE_STROKE_PURE);
   worldCanvasMain = createGraphics(width, height, P3D);
   try {
     worldCanvasFullscreen = createGraphics(displayWidth, displayHeight, P3D);
   } catch (Exception e) {
-    // unneeded to instantiate, just incase 
+    // don't have to instantiate, just in case 
     worldCanvasFullscreen = createGraphics(width, height, P3D);
   }
+  renderHints(worldCanvasMain);
+  renderHints(worldCanvasFullscreen);
+  
   frameRate(60);
   die.position.x = width / 2;
   die.position.y = die.size.magnitude();
+}
+
+void renderHints(PGraphics canvas) {
+  canvas.hint(DISABLE_OPENGL_ERRORS);
+  canvas.hint(DISABLE_TEXTURE_MIPMAPS);
+  canvas.hint(ENABLE_STROKE_PERSPECTIVE);
 }
 
 int old = -1;
