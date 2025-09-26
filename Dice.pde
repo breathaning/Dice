@@ -218,7 +218,7 @@ class Die extends PhysicsInstance {
     pushMatrix();
     translate(0, 0, size.z / 2 + lift);
     ellipse(0, 0, dotSize, dotSize);
-    pushMatrix();
+    popMatrix();
     // 6
     pushMatrix();
     translate(0, 0, -size.z / 2 - lift);
@@ -228,7 +228,7 @@ class Die extends PhysicsInstance {
     ellipse(-size.x / 6, size.y / 4, dotSize, dotSize);
     ellipse(-size.x / 6, 0, dotSize, dotSize);
     ellipse(-size.x / 6, -size.y / 4, dotSize, dotSize);
-    pushMatrix();
+    popMatrix();
   }
 }
 class Vector3 {
