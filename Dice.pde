@@ -219,9 +219,17 @@ class Die extends PhysicsInstance {
     translate(0, 0, size.z / 2 + lift);
     ellipse(0, 0, dotSize, dotSize);
     popMatrix();
+    // 3
+    pushMatrix();
+    translate(0, -size.y / 2 - lift, 0);
+    rotateY(HALF_PI);
+    ellipse(0, 0 dotSize, dotSize);
+    ellipse(-size.x / 3, size.y / 3, dotSize, dotSize);
+    ellipse(size.x / 3, -size.y / 3, dotSize, dotSize);
+    popMatrix();
     // 4
     pushMatrix();
-    translate(0, 0, size.y / 2 + lift);
+    translate(0, size.y / 2 + lift, 0);
     rotateY(HALF_PI);
     ellipse(size.x / 3, size.y / 3, dotSize, dotSize);
     ellipse(-size.x / 3, size.y / 3, dotSize, dotSize);
