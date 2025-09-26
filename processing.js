@@ -7038,7 +7038,6 @@
       if (p.imageData) drawing.$ensureContext().putImageData(p.imageData, 0, 0)
     };
     p.hint = function(which) {
-      if (true) {return;}
        var curContext = drawing.$ensureContext();
       try {
       if (which === 4) {
