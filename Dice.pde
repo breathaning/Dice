@@ -209,6 +209,15 @@ class Die extends PhysicsInstance {
     translateWorld(position);
     rotateWorld(rotation);
     boxWorld(die.size);
+
+    int lift = 1;
+    int size = die.size.average() / 10;
+    fill(0, 0, 0);
+    noStroke();
+    pushMatrix();
+    translate(0, 0, box.size / 2 + lift);
+    ellipse(0, 0, size, size);
+    pushMatrix();
   }
 }
 class Vector3 {
