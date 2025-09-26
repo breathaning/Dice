@@ -13858,10 +13858,9 @@ module.exports = function setupParser(Processing, options) {
       curContext.readPixels(x, y, w, h, curContext.RGBA, curContext.UNSIGNED_BYTE, uBuff);
 	  var reversedBuffer = [];
 	  var increment = w * 4;
-	  for (var i=0; i < h; i++) {
-        reversedBuffer.push(...(uBuff.slice(i *  increment, (i + 1) * increment).reverse()));
+	  for (var i=h; i > 0; i--) {
+        reversedBuffer.push(...uBuff.slice((i - 1) *  increment, i * increment));
       }
-		console.log(reversedBuffer);
 	  obj.data.set(reversedBuffer);
       return obj;
     };
