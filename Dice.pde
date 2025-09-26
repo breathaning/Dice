@@ -17,12 +17,6 @@ PVInstance cameraInstance = new PVInstance();
 void settings() {
   size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P3D);
   smooth(2);
-  
-  try {
-    Math.signum(0);
-  } catch(Exception e) {
-    FLAG_BROWSER = true;
-  }
 }
 
 void setup() {
