@@ -13861,6 +13861,7 @@ module.exports = function setupParser(Processing, options) {
 		  dataArray.push(...uBuff.slice(ul - w * 4 * (i - 1), ul - w * 4 * i));
       }
 	  obj.data = new Uint8Array(dataArray);
+		console.log(obj);
       return obj;
     };
 
