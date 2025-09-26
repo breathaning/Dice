@@ -10,6 +10,8 @@ float DIE_STOP_SPEED_THRESHOLD = 0.1;
 int INITIAL_CANVAS_WIDTH = 750;
 int INITIAL_CANVAS_HEIGHT = 750;
 
+ArrayList<Instance> instanceList = new ArrayList<Instance>();
+
 Die die = new Die();
 PVInstance focus;
 PVInstance cameraInstance = new PVInstance();
@@ -89,7 +91,7 @@ void drawWorld() {
   background(135, 206, 235);
   drawGround();
   drawShadow(die.position);
-  drawDice(die.position, die.rotation);
+  drawInstances();
 }
 
 void updateCamera() {
@@ -133,15 +135,12 @@ void drawShadow(Vector3 position) {
   popMatrix();
 }
 
-void drawDice(Vector3 position, Vector3 rotation) {
-  pushMatrix();
-  fill(255, 255, 255);
-  stroke(0, 0, 0);
-  strokeWeight(4);
-  translateWorld(position);
-  rotateWorld(rotation);
-  boxWorld(die.size);
-  popMatrix();
+void drawInstances() {
+  for (int i = 0; i < instanceList.size(); i++) {
+    pushMatrix();
+    instanceList.get(i).draw();
+    popMatrix();
+  }
 }
 
 void drawUI() {
@@ -151,7 +150,6 @@ void drawUI() {
   pushMatrix();
   ellipse(width, height / 2, 50, 50);
   popMatrix();
-  //image(uiCanvas.get(), 0, 0);
 }
 
 // utility functions
@@ -178,7 +176,15 @@ Vector3 getLookVector(Vector3 vectorOne, Vector3 vectorTwo) {
 }
 
 // utility classes
-class PVInstance {
+class Instance {
+  
+  Instance() {
+    instanceList.add(this);
+  }
+  
+  void draw() {}
+}
+class PVInstance extends Instance {
   Vector3 position = new Vector3(0, 0, 0);
   Vector3 rotation = new Vector3(0, 0, 0);
 }
@@ -194,6 +200,15 @@ class Die extends PhysicsInstance {
   boolean grounded = false;
   Die() {
     super();
+  }
+  
+  void draw() {
+    fill(255, 255, 255);
+    stroke(0, 0, 0);
+    strokeWeight(4);
+    translateWorld(position);
+    rotateWorld(rotation);
+    boxWorld(die.size);
   }
 }
 class Vector3 {
