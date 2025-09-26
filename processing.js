@@ -15065,10 +15065,6 @@ module.exports = function setupParser(Processing, options) {
         upY = 1;
         upZ = 0;
       }
-
-      // reverse values
-      eyeX *= -1;
-	  upY *= -1;
 		
       var z = new PVector(eyeX - centerX, eyeY - centerY, eyeZ - centerZ);
       var y = new PVector(upX, upY, upZ);
