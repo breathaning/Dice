@@ -21,8 +21,6 @@ void settings() {
 
 void setup() {
   frameRate(FRAME_RATE);
-  uiCanvas = createGraphics(width, height, P2D);
-  uiCanvas.smooth(4);
   
   die.position.x = width / 2;
   die.position.y = die.size.magnitude();
