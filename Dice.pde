@@ -7,6 +7,8 @@ float FLOOR_HEIGHT = 30;
 float DIE_CONTROL_MAX_VELOCITY = 2500;
 float DIE_STOP_SPEED_THRESHOLD = 0.1;
 
+boolean FLAG_BROWSER = true;
+
 int INITIAL_CANVAS_WIDTH = 750;
 int INITIAL_CANVAS_HEIGHT = 750;
 
@@ -28,6 +30,12 @@ void setup() {
   frameRate(60);
   die.position.x = width / 2;
   die.position.y = die.size.magnitude();
+  
+  try {
+    Math.signum(0);
+  } catch(Exception e) {
+    FLAG_BROWSER = true;
+  }
 }
 
 int old = -1;
@@ -101,7 +109,15 @@ void drawWorld() {
   drawShadow(die.position);
   drawDice(die.position, die.rotation);
   worldCanvas.endDraw();
-  image(worldCanvas, 0, 0);
+  PImage worldRenderImage = worldCanvas.get();
+  if (FLAG_BROWSER) {
+    pushMatrix();
+    scale(1.0, -1.0);
+    image(worldRenderImage, 0, -height);
+    popMatrix();
+  } else {
+    image(worldRenderImage, 0, 0);
+  }
 }
 
 void updateCamera() {
