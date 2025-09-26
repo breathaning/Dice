@@ -211,7 +211,7 @@ class Die extends PhysicsInstance {
     boxWorld(this.size);
 
     int lift = 1;
-    int dotSize = size.average() / 4;
+    int dotSize = size.average() / 5;
     fill(0, 0, 0);
     noStroke();
     // 1
@@ -224,28 +224,28 @@ class Die extends PhysicsInstance {
     translate(0, -size.y / 2 - lift, 0);
     rotateX(-HALF_PI);
     ellipse(0, 0, dotSize, dotSize);
-    ellipse(-size.x / 3, size.y / 3, dotSize, dotSize);
-    ellipse(size.x / 3, -size.y / 3, dotSize, dotSize);
+    ellipse(-size.x / 4, size.y / 4, dotSize, dotSize);
+    ellipse(size.x / 4, -size.y / 4, dotSize, dotSize);
     popMatrix();
     // 4
     pushMatrix();
     translate(0, size.y / 2 + lift, 0);
     rotateX(HALF_PI);
-    ellipse(size.x / 3, size.y / 3, dotSize, dotSize);
-    ellipse(-size.x / 3, size.y / 3, dotSize, dotSize);
-    ellipse(size.x / 3, -size.y / 3, dotSize, dotSize);
-    ellipse(-size.x / 3, -size.y / 3, dotSize, dotSize);
+    ellipse(size.x / 4, size.y / 4, dotSize, dotSize);
+    ellipse(-size.x / 4, size.y / 4, dotSize, dotSize);
+    ellipse(size.x / 4, -size.y / 4, dotSize, dotSize);
+    ellipse(-size.x / 4, -size.y / 4, dotSize, dotSize);
     popMatrix();
     // 6
     pushMatrix();
     translate(0, 0, -size.z / 2 - lift);
     rotateX(PI);
-    ellipse(size.x / 4, size.y / 3, dotSize, dotSize);
-    ellipse(size.x / 4, 0, dotSize, dotSize);
-    ellipse(size.x / 4, -size.y / 3, dotSize, dotSize);
-    ellipse(-size.x / 4, size.y / 3, dotSize, dotSize);
-    ellipse(-size.x / 4, 0, dotSize, dotSize);
-    ellipse(-size.x / 4, -size.y / 3, dotSize, dotSize);
+    ellipse(size.x / 5, size.y / 4, dotSize, dotSize);
+    ellipse(size.x / 5, 0, dotSize, dotSize);
+    ellipse(size.x / 5, -size.y / 4, dotSize, dotSize);
+    ellipse(-size.x / 5, size.y / 4, dotSize, dotSize);
+    ellipse(-size.x / 5, 0, dotSize, dotSize);
+    ellipse(-size.x / 5, -size.y / 4, dotSize, dotSize);
     popMatrix();
   }
 }
