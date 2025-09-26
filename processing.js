@@ -13856,12 +13856,7 @@ module.exports = function setupParser(Processing, options) {
           obj = ctx.createImageData(w, h),
           uBuff = new Uint8Array(w * h * 4);
       curContext.readPixels(x, y, w, h, curContext.RGBA, curContext.UNSIGNED_BYTE, uBuff);
-	  var reversedBuffer = [];
-	  var increment = w * 4;
-	  for (var i=h; i > 0; i--) {
-        reversedBuffer.push(...uBuff.slice((i - 1) *  increment, i * increment));
-      }
-	  obj.data.set(reversedBuffer);
+	  obj.data.set(uBuff);
       return obj;
     };
 
@@ -15071,6 +15066,10 @@ module.exports = function setupParser(Processing, options) {
         upZ = 0;
       }
 
+      // reverse values
+      eyeX *= -1;
+	  upY *= -1;
+		
       var z = new PVector(eyeX - centerX, eyeY - centerY, eyeZ - centerZ);
       var y = new PVector(upX, upY, upZ);
       z.normalize();
