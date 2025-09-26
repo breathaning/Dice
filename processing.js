@@ -13858,9 +13858,10 @@ module.exports = function setupParser(Processing, options) {
       curContext.readPixels(x, y, w, h, curContext.RGBA, curContext.UNSIGNED_BYTE, uBuff);
 	  var dataArray = new Array(uBuff.length);
 	var abc = [];
-	  for (var i=0, ul=uBuff.length; i < ul; i += w * 4) {
+	  var increment = w * 4;
+	  for (var i=0, ul=uBuff.length; i < ul; i += increment) {
 		  abc.push(ul - w * 4 * i);
-		  dataArray.push(...uBuff.slice(ul - w * 4 * (i - 1), ul - w * 4 * i));
+		  dataArray.push(...uBuff.slice(ul - i - increment, ul - i);
       }
 	  obj.data = new Uint8ClampedArray(dataArray);
 		console.log(abc);
