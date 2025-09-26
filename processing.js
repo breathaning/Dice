@@ -13857,14 +13857,13 @@ module.exports = function setupParser(Processing, options) {
           uBuff = new Uint8Array(w * h * 4);
       curContext.readPixels(x, y, w, h, curContext.RGBA, curContext.UNSIGNED_BYTE, uBuff);
 	  var dataArray = new Array(uBuff.length);
-	var abc = [];
 	  var increment = w * 4;
 	  for (var i=0, ul=uBuff.length; i < ul; i += increment) {
 		  abc.push(ul - i);
 		  dataArray.push(...uBuff.slice(ul - i - increment, ul - i));
       }
 	  obj.data = new Uint8ClampedArray(dataArray);
-		console.log(abc);
+		console.log(obj);
       return obj;
     };
 
