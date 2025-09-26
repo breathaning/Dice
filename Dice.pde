@@ -18,6 +18,7 @@ PGraphics worldCanvasFullscreen;
 
 void settings() {
   size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P2D);
+  smooth(4);
 }
 
 void setup() {
@@ -28,16 +29,10 @@ void setup() {
     // don't have to instantiate, just in case 
     worldCanvasFullscreen = createGraphics(width, height, P3D);
   }
-  renderHints(worldCanvasMain);
-  renderHints(worldCanvasFullscreen);
   
   frameRate(60);
   die.position.x = width / 2;
   die.position.y = die.size.magnitude();
-}
-
-void renderHints(PGraphics canvas) {
-  canvas.hint(ENABLE_OPENGL_4X_SMOOTH);
 }
 
 int old = -1;
@@ -133,7 +128,7 @@ void drawGround() {
   worldCanvas.pushMatrix();
   worldCanvas.fill(37, 129, 57);
   worldCanvas.stroke(0, 0, 0);
-  worldCanvas.strokeWeight(32);
+  worldCanvas.strokeWeight(12);
   translateWorld(new Vector3(cameraInstance.position.x, height - FLOOR_HEIGHT + 16, cameraInstance.position.z));
   worldCanvas.rotateX(radians(90));
   float scale = Math.min(Math.max(width, height) * 12, 11000);
