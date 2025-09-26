@@ -13856,7 +13856,9 @@ module.exports = function setupParser(Processing, options) {
           obj = ctx.createImageData(w, h),
           uBuff = new Uint8Array(w * h * 4);
       curContext.readPixels(x, y, w, h, curContext.RGBA, curContext.UNSIGNED_BYTE, uBuff);
-		obj.data = uBuff;
+	  for (var i=0, ul=uBuff.length, obj_data=obj.data; i < ul; i += w * 4) {
+		  obj_data.push(...uBuff.slice(ul - w * 4 * (i - 1), ul - w * 4 * i));
+      }
       return obj;
     };
 
