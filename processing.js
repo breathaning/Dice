@@ -19528,15 +19528,16 @@ module.exports = function setupParser(Processing, options) {
         var hgt = h || img.height;
 
         var bounds = imageModeConvert(x || 0, y || 0, w || img.width, h || img.height, arguments.length < 4);
-        var fastImage = !!img.sourceImg && curTint === null;
-        if (fastImage || true) {
+        // var fastImage = !!img.sourceImg && curTint === null;
+		var fastImage = curTint === null;
+        if (fastImage) {
           var htmlElement = img.sourceImg;
           if (img.__isDirty) {
             img.updatePixels();
           }
           // Using HTML element's width and height in case if the image was resized.
           curContext.drawImage(htmlElement, 0, 0,
-            htmlElement.width, htmlElement.height, bounds.x, bounds.y, bounds.w, bounds.h);
+            htmlElement.width || img.width, htmlElement.height || img.height, bounds.x, bounds.y, bounds.w, bounds.h);
         } else {
           var obj = img.toImageData();
 
