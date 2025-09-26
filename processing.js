@@ -15062,12 +15062,12 @@ module.exports = function setupParser(Processing, options) {
         centerY = cameraY;
         centerZ = 0;
         upX = 0;
-        upY = 1;
+        upY = -1;
         upZ = 0;
       }
 
       var z = new PVector(eyeX - centerX, eyeY - centerY, eyeZ - centerZ);
-      var y = new PVector(upX, upY, upZ);
+      var y = new PVector(upX, -upY, upZ);
       z.normalize();
       var x = PVector.cross(y, z);
       y = PVector.cross(z, x);
