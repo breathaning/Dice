@@ -1,3 +1,5 @@
+// fine red rgb(255, 40, 67)
+// beige rgb(255, 236, 207)
 int FRAME_RATE = 60;
 float FRAME_INTERVAL = 1.0 / FRAME_RATE;
 float GRAVITY = 981;
@@ -22,7 +24,7 @@ void settings() {
 void setup() {
   worldCanvas = createGraphics(width, height, P3D);
   worldCanvas.smooth(4);
-  
+
   frameRate(60);
   die.position.x = width / 2;
   die.position.y = die.size.magnitude();
@@ -45,7 +47,7 @@ void handleInput() {
     die.rotation.x += 0.1;
     //die.rotation.y += 0.1;
     //die.rotation.z += 0.1;
-    
+
     Vector3 velocity = new Vector3(mouseX - die.position.x, mouseY - die.position.y, 0).multiply(15);
     if (velocity.magnitude() > DIE_CONTROL_MAX_VELOCITY) {
       velocity = velocity.unit().multiply(DIE_CONTROL_MAX_VELOCITY);
@@ -58,9 +60,9 @@ void physicsStep(float deltaTime) {
   die.rotation = die.rotation.normalize(TWO_PI);
   die.velocity.y += GRAVITY * deltaTime;
   die.position = die.position.add(die.velocity.multiply(deltaTime));
-  
+
   float boundRadius = die.size.average() / 2;
-  
+
   die.grounded = die.velocity.y < GRAVITY * deltaTime + 5;
   if (die.position.y >= height - FLOOR_HEIGHT - boundRadius) {
     if (die.grounded) {
@@ -85,6 +87,11 @@ void physicsStep(float deltaTime) {
 
 // draw functions
 void drawWorld() {
+  try {
+    worldCanvas.setSize(width, height);
+  } catch(Exception e) {
+    
+  }
   worldCanvas.beginDraw();
   updateCamera();
   worldCanvas.noLights();
@@ -105,8 +112,8 @@ void updateCamera() {
     cameraInstance.position = cameraInstance.position.add(die.position.subtract(cameraInstance.position).subtract(die.velocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
   }
   worldCanvas.camera(
-    cameraInstance.position.x - (width / 2.0), cameraInstance.position.y - (height / 2.0), cameraInstance.position.z - ((height / 2.0) / tan(PI * 30.0 / 180)), 
-    die.position.x, die.position.y, die.position.z, 
+    cameraInstance.position.x - (width / 2.0), cameraInstance.position.y - (height / 2.0), cameraInstance.position.z - ((height / 2.0) / tan(PI * 30.0 / 180)),
+    die.position.x, die.position.y, die.position.z,
     0, 1, 0
   );
 }
@@ -151,7 +158,7 @@ void drawDice(Vector3 position, Vector3 rotation) {
 
 void drawUI() {
   pushMatrix();
-  //ellipse(width / 2, height / 2, 50, 50);
+  //ellipse(width, height / 2, 50, 50);
   popMatrix();
 }
 
@@ -186,7 +193,7 @@ class PVInstance {
 class PhysicsInstance extends PVInstance {
   Vector3 velocity = new Vector3(0, 0, 0);
   Vector3 size = new Vector3(50, 50, 50);
-  
+
   PhysicsInstance() {
     super();
   }
@@ -201,41 +208,41 @@ class Vector3 {
   float x;
   float y;
   float z;
-  
+
   Vector3(float x, float y, float z) {
     this.x = x;
     this.y = y;
     this.z = z;
   }
-  
+
   Vector3 add(Vector3 otherVector) {
     return new Vector3(x + otherVector.x, y + otherVector.y, z + otherVector.z);
   }
-  
+
   Vector3 subtract(Vector3 otherVector) {
     return add(otherVector.inverse());
   }
-  
+
   Vector3 multiply(float scalar) {
     return new Vector3(x * scalar, y * scalar, z * scalar);
   }
-  
+
   Vector3 divide(float scalar) {
     return new Vector3(x / scalar, y / scalar, z / scalar);
   }
-  
+
   Vector3 normalize(float max) {
     return new Vector3(x % max, y % max, z % max);
   }
-  
+
   Vector3 inverse() {
-   return new Vector3(-x, -y, -z); 
+    return new Vector3(-x, -y, -z);
   }
-  
+
   Vector3 absolute() {
     return new Vector3(Math.abs(x), Math.abs(y), Math.abs(z));
   }
-  
+
   Vector3 unit() {
     float magnitudeValue = magnitude();
     if (magnitudeValue == 0) {
@@ -243,19 +250,19 @@ class Vector3 {
     }
     return this.divide(magnitudeValue);
   }
-  
+
   Vector3 round() {
     return new Vector3(Math.round(x), Math.round(y), Math.round(z));
   }
-  
+
   Vector3 copy() {
     return new Vector3(x, y, z);
   }
-  
-  float average() { 
+
+  float average() {
     return (Math.abs(x) + Math.abs(y) + Math.abs(z)) / 3;
   }
-  
+
   float magnitude() {
     return (float)Math.sqrt((x * x) + (y * y) + (z * z));
   }
