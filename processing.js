@@ -9815,7 +9815,6 @@ module.exports = function setupParser(Processing, options) {
     p.keyTyped        = noop;
     p.draw            = undef;
     p.setup           = undef;
-	p.settings        = undef;
 
     // Remapped vars
     p.__mousePressed  = false;
@@ -13856,7 +13855,9 @@ module.exports = function setupParser(Processing, options) {
           obj = ctx.createImageData(w, h),
           uBuff = new Uint8Array(w * h * 4);
       curContext.readPixels(x, y, w, h, curContext.RGBA, curContext.UNSIGNED_BYTE, uBuff);
-	  obj.data.set(uBuff);
+      for (var i=0, ul=uBuff.length, obj_data=obj.data; i < ul; i++) {
+        obj_data[i] = uBuff[(h - 1 - Math.floor(i / 4 / w)) * w * 4 + (i % (w * 4))];
+      }
       return obj;
     };
 
@@ -15065,7 +15066,7 @@ module.exports = function setupParser(Processing, options) {
         upY = 1;
         upZ = 0;
       }
-		
+
       var z = new PVector(eyeX - centerX, eyeY - centerY, eyeZ - centerZ);
       var y = new PVector(upX, upY, upZ);
       z.normalize();
@@ -19532,7 +19533,6 @@ module.exports = function setupParser(Processing, options) {
           if (img.__isDirty) {
             img.updatePixels();
           }
-			
           // Using HTML element's width and height in case if the image was resized.
           curContext.drawImage(htmlElement, 0, 0,
             htmlElement.width, htmlElement.height, bounds.x, bounds.y, bounds.w, bounds.h);
@@ -21566,9 +21566,6 @@ module.exports = function setupParser(Processing, options) {
           // pass a reference to the p instance for this sketch.
           curSketch.onLoad(processing);
 
-		  if (processing.settings) {
-			  processing.settings();
-		  }
           // Run void setup()
           if (processing.setup) {
             processing.setup();
