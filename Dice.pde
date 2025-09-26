@@ -13,8 +13,6 @@ PVInstance focus;
 PVInstance cameraInstance = new PVInstance();
 
 PGraphics worldCanvas;
-PGraphics worldCanvasMain;
-PGraphics worldCanvasFullscreen;
 
 void settings() {
   size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P2D);
@@ -22,13 +20,8 @@ void settings() {
 }
 
 void setup() {
-  worldCanvasMain = createGraphics(width, height, P3D);
-  try {
-    worldCanvasFullscreen = createGraphics(displayWidth, displayHeight, P3D);
-  } catch (Exception e) {
-    // don't have to instantiate, just in case 
-    worldCanvasFullscreen = createGraphics(width, height, P3D);
-  }
+  worldCanvas = createGraphics(width, height, P3D);
+  worldCanvas.smooth(4);
   
   frameRate(60);
   die.position.x = width / 2;
@@ -92,11 +85,6 @@ void physicsStep(float deltaTime) {
 
 // draw functions
 void drawWorld() {
-  if (width == INITIAL_CANVAS_WIDTH && height == INITIAL_CANVAS_HEIGHT) {
-    worldCanvas = worldCanvasMain;
-  } else {
-    worldCanvas = worldCanvasFullscreen;
-  }
   worldCanvas.beginDraw();
   updateCamera();
   worldCanvas.noLights();
@@ -112,13 +100,12 @@ void drawWorld() {
 void updateCamera() {
   if (die.velocity.magnitude() <= DIE_STOP_SPEED_THRESHOLD && die.grounded) {
     Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(millis() / 1000.0), 300 + 200 * (float)Math.sin(millis() / 1000.0), 1000 * (float)Math.cos(millis() / 1000.0));
-    cameraInstance.position = cameraInstance.position.add(die.position.subtract(getCameraWorldPosition(cameraInstance.position)).subtract(goalPosition).divide(10));
+    cameraInstance.position = cameraInstance.position.add(die.position.subtract(cameraInstance.position).subtract(goalPosition).divide(10));
   } else {
-    cameraInstance.position = cameraInstance.position.add(die.position.subtract(getCameraWorldPosition(cameraInstance.position)).subtract(die.velocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
+    cameraInstance.position = cameraInstance.position.add(die.position.subtract(cameraInstance.position).subtract(die.velocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
   }
-  Vector3 cameraWorldPosition = getCameraWorldPosition(cameraInstance.position);
   worldCanvas.camera(
-    cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z, 
+    cameraInstance.position.x - (width / 2.0), cameraInstance.position.y - (height / 2.0), cameraInstance.position.z - ((height / 2.0) / tan(PI * 30.0 / 180)), 
     die.position.x, die.position.y, die.position.z, 
     0, 1, 0
   );
@@ -129,9 +116,9 @@ void drawGround() {
   worldCanvas.fill(37, 129, 57);
   worldCanvas.stroke(0, 0, 0);
   worldCanvas.strokeWeight(12);
-  translateWorld(new Vector3(cameraInstance.position.x, height - FLOOR_HEIGHT + 16, cameraInstance.position.z));
+  translateWorld(new Vector3(die.position.x, height - FLOOR_HEIGHT + 16, die.position.z));
   worldCanvas.rotateX(radians(90));
-  float scale = Math.min(Math.max(width, height) * 12, 11000);
+  float scale = Math.min(Math.max(width, height) * 12, 1000);
   worldCanvas.ellipse(0, 0, scale, scale);
   worldCanvas.popMatrix();
 }
@@ -190,15 +177,6 @@ Vector3 getLookVector(Vector3 vectorOne, Vector3 vectorTwo) {
   }
   return deltaVector.unit();
 }
-
-Vector3 getCameraWorldPosition(Vector3 position) {
-  return new Vector3(
-    position.x + width / 2.0, 
-    position.y + height / 2.0, 
-    position.z + (height / 2.0) / tan(PI * 30.0 / 180)
-  );
-}
-
 
 // utility classes
 class PVInstance {
