@@ -115,7 +115,7 @@ void drawGround() {
   strokeWeight(12);
   translateWorld(new Vector3(die.position.x, height - FLOOR_HEIGHT + 16, die.position.z));
   rotateX(radians(90));
-  float scale = Math.min(Math.max(width, height) * 12, 1000);
+  float scale = Math.min(Math.max(width, height) * 12, 64000);
   ellipse(0, 0, scale, scale);
   popMatrix();
 }
