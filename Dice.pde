@@ -15,6 +15,7 @@ ArrayList<Instance> instanceList = new ArrayList<Instance>();
 Die die = new Die();
 PVInstance focus;
 PVInstance cameraInstance = new PVInstance();
+boolean pmousePressed = mousePressed;
 
 void settings() {
   size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P3D);
@@ -28,30 +29,40 @@ void setup() {
   die.position.y = die.size.magnitude();
 }
 
-int old = -1;
+int pmillis = -1;
 void draw() {
+  updateCamera();
   handleInput();
-  if (old == -1) {
-    old = millis();
+
+  if (pmillis == -1) {
+    pmillis = millis();
   }
-  physicsStep((millis() - old) / 1000.0);
-  old = millis();
+  physicsStep((millis() - pmillis) / 1000.0);
+  pmillis = millis();
+  
   drawWorld();
   drawUI();
 }
 
 void handleInput() {
-  if (mousePressed == true) {
-    die.rotation.x += 0.1;
-    //die.rotation.y += 0.1;
-    //die.rotation.z += 0.1;
+  boolean mouseReleased = pmousePressed && !mousePressed;
 
-    Vector3 velocity = new Vector3(mouseX - die.position.x, mouseY - die.position.y, 0).multiply(15);
-    if (velocity.magnitude() > DIE_CONTROL_MAX_VELOCITY) {
-      velocity = velocity.unit().multiply(DIE_CONTROL_MAX_VELOCITY);
-    }
-    die.velocity = velocity;
+  //if (mousePressed == true) {
+  //  die.rotation.x += 0.1;
+  //  //die.rotation.y += 0.1;
+  //  //die.rotation.z += 0.1;
+  //
+  //  Vector3 velocity = new Vector3(mouseX - die.position.x, mouseY - die.position.y, 0).multiply(15);
+  //  if (velocity.magnitude() > DIE_CONTROL_MAX_VELOCITY) {
+  //    velocity = velocity.unit().multiply(DIE_CONTROL_MAX_VELOCITY);
+  //  }
+  //  die.velocity = velocity;
+  //}
+  if (mouseReleased) {
+    
   }
+
+  pmousePressed = mousePressed
 }
 
 void physicsStep(float deltaTime) {
@@ -84,16 +95,6 @@ void physicsStep(float deltaTime) {
 }
 
 // draw functions
-void drawWorld() {
-  hint(ENABLE_DEPTH_TEST);
-  updateCamera();
-  lights();
-  background(135, 206, 235);
-  drawGround();
-  drawShadow(die.position);
-  drawInstances();
-}
-
 void updateCamera() {
   if (die.velocity.magnitude() <= DIE_STOP_SPEED_THRESHOLD && die.grounded) {
     Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(millis() / 1000.0), 300 + 200 * (float)Math.sin(millis() / 1000.0), 1000 * (float)Math.cos(millis() / 1000.0));
@@ -101,12 +102,24 @@ void updateCamera() {
   } else {
     cameraInstance.position = cameraInstance.position.add(die.position.subtract(cameraInstance.position).subtract(die.velocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
   }
+}
+
+void drawWorld() {
+  hint(ENABLE_DEPTH_TEST);
   camera(
     cameraInstance.position.x - (width / 2.0), cameraInstance.position.y - (height / 2.0), cameraInstance.position.z - ((height / 2.0) / tan(PI * 30.0 / 180)),
     die.position.x, die.position.y, die.position.z,
     0, 1, 0
   );
+  lights();
+  background(135, 206, 235);
+  pushMatrix();
+  drawGround();
+  drawShadow(die.position);
+  drawInstances();
+  popMatrix();
 }
+
 
 void drawGround() {
   pushMatrix();
@@ -148,8 +161,12 @@ void drawUI() {
   camera();
   noLights();
   pushMatrix();
-  ellipse(width, height / 2, 50, 50);
+  drawLaunchCharge();
   popMatrix();
+}
+
+void drawLaunchCharge() {
+
 }
 
 // utility functions
@@ -183,11 +200,17 @@ class Instance {
   }
   
   void draw() {}
+
+  void destroy() {
+    instanceList.remove(this);
+  }
 }
+
 class PVInstance extends Instance {
   Vector3 position = new Vector3(0, 0, 0);
   Vector3 rotation = new Vector3(0, 0, 0);
 }
+
 class PhysicsInstance extends PVInstance {
   Vector3 velocity = new Vector3(0, 0, 0);
   Vector3 size = new Vector3(50, 50, 50);
@@ -267,6 +290,7 @@ class Die extends PhysicsInstance {
     popMatrix();
   }
 }
+
 class Vector3 {
   float x;
   float y;
