@@ -13860,7 +13860,7 @@ module.exports = function setupParser(Processing, options) {
 	  for (var i=0, ul=uBuff.length; i < ul; i += w * 4) {
 		  dataArray.push(...uBuff.slice(ul - w * 4 * (i - 1), ul - w * 4 * i));
       }
-	  obj.data = new Uint8Array(dataArray);
+	  obj.data = new Uint8ClampedArray(dataArray);
 		console.log(obj);
       return obj;
     };
