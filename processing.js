@@ -8527,7 +8527,7 @@
           curSketch.attach(processing, defaultScope);
           curSketch.onLoad(processing);
           if (processing.settings) {
-            procesing.settings();
+            processing.settings();
           }
           if (processing.setup) {
             processing.setup();
