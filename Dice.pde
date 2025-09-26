@@ -21,7 +21,6 @@ void settings() {
 }
 
 void setup() {
-  hint(ENABLE_STROKE_PURE);
   worldCanvasMain = createGraphics(width, height, P3D);
   try {
     worldCanvasFullscreen = createGraphics(displayWidth, displayHeight, P3D);
@@ -38,8 +37,7 @@ void setup() {
 }
 
 void renderHints(PGraphics canvas) {
-  canvas.hint(DISABLE_OPENGL_ERRORS);
-  canvas.hint(DISABLE_TEXTURE_MIPMAPS);
+  canvas.hint(ENABLE_OPENGL_4X_SMOOTH);
   canvas.hint(ENABLE_STROKE_PERSPECTIVE);
 }
 
