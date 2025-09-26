@@ -19539,8 +19539,7 @@ module.exports = function setupParser(Processing, options) {
           curContext.drawImage(htmlElement, 0, 0,
             htmlElement.width, htmlElement.height, bounds.x, bounds.y, bounds.w, bounds.h);
         } else {
-		console.log(img);
-          var obj = img.toImageData();
+          var obj = img.imageData;
 
           // Tint the image
           if (curTint !== null) {
