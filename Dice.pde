@@ -7,7 +7,7 @@ float FLOOR_HEIGHT = 30;
 float DIE_CONTROL_MAX_VELOCITY = 2500;
 float DIE_STOP_SPEED_THRESHOLD = 0.1;
 
-boolean FLAG_BROWSER = true;
+boolean FLAG_BROWSER = false;
 
 int INITIAL_CANVAS_WIDTH = 750;
 int INITIAL_CANVAS_HEIGHT = 750;
@@ -21,6 +21,12 @@ PGraphics worldCanvas;
 void settings() {
   size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P2D);
   smooth(4);
+  
+  try {
+    Math.signum(0);
+  } catch(Exception e) {
+    FLAG_BROWSER = true;
+  }
 }
 
 void setup() {
@@ -30,12 +36,6 @@ void setup() {
   frameRate(60);
   die.position.x = width / 2;
   die.position.y = die.size.magnitude();
-  
-  try {
-    Math.signum(0);
-  } catch(Exception e) {
-    FLAG_BROWSER = true;
-  }
 }
 
 int old = -1;
