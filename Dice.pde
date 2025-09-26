@@ -30,10 +30,10 @@ void settings() {
 }
 
 void setup() {
+  frameRate(FRAME_RATE);
   worldCanvas = createGraphics(width, height, P3D);
   worldCanvas.smooth(4);
-
-  frameRate(60);
+  
   die.position.x = width / 2;
   die.position.y = die.size.magnitude();
 }
