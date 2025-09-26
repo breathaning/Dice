@@ -95,11 +95,6 @@ void physicsStep(float deltaTime) {
 
 // draw functions
 void drawWorld() {
-  try {
-    setSize(width, height);
-  } catch(Exception e) {
-    
-  }
   updateCamera();
   noLights();
   lights();
@@ -171,10 +166,15 @@ void drawDice(Vector3 position, Vector3 rotation) {
 }
 
 void drawUI() {
+  try {
+    uiCanvas.setSize(width, height);
+  } catch(Exception e) {
+    
+  }
   uiCanvas.beginDraw();
   uiCanvas.ellipse(width, height / 2, 50, 50);
   uiCanvas.endDraw();
-  image(uiCanvas, 0, 0);
+  image(uiCanvas.get(), 0, 0);
 }
 
 // utility functions
