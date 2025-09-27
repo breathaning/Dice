@@ -211,29 +211,6 @@ void drawLaunchCharge() {
   }
 }
 
-// utility functions
-void translateWorld(Vector3 translation) {
-  translate(translation.x, translation.y, translation.z);
-}
-
-void rotateWorld(Vector3 rotation) {
-  rotateX(rotation.x);
-  rotateY(rotation.y);
-  rotateZ(rotation.z);
-}
-
-void boxWorld(Vector3 size) {
-  box(size.x, size.y, size.z);
-}
-
-Vector3 getLookVector(Vector3 vectorOne, Vector3 vectorTwo) {
-  Vector3 deltaVector = vectorTwo.subtract(vectorOne);
-  if (deltaVector.magnitude() == 0) {
-    return new Vector3(0, 0, -1);
-  }
-  return deltaVector.unit();
-}
-
 // utility classes
 class Instance {
   
@@ -287,53 +264,38 @@ class Die extends PhysicsInstance {
     // 1
     pushMatrix();
     translate(0, 0, size.z / 2 + lift);
-    ellipse(0, 0, dotSize, dotSize);
+    drawDieDots(1, 0, 0, size.average(), color(0, 0, 0));
     popMatrix();
     // 2
     pushMatrix();
     translate(size.x / 2 + lift, 0, 0);
     rotateY(-HALF_PI);
-    ellipse(-size.x / 4, size.y / 4, dotSize, dotSize);
-    ellipse(size.x / 4, -size.y / 4, dotSize, dotSize);
+    drawDieDots(2, 0, 0, size.average(), color(0, 0, 0));
     popMatrix();
     // 3
     pushMatrix();
     translate(0, -size.y / 2 - lift, 0);
     rotateX(-HALF_PI);
     rotate(HALF_PI);
-    ellipse(-size.x / 4, size.y / 4, dotSize, dotSize);
-    ellipse(0, 0, dotSize, dotSize);
-    ellipse(size.x / 4, -size.y / 4, dotSize, dotSize);
+    drawDieDots(3, 0, 0, size.average(), color(0, 0, 0));
     popMatrix();
     // 4
     pushMatrix();
     translate(0, size.y / 2 + lift, 0);
     rotateX(HALF_PI);
-    ellipse(size.x / 4, size.y / 4, dotSize, dotSize);
-    ellipse(-size.x / 4, size.y / 4, dotSize, dotSize);
-    ellipse(size.x / 4, -size.y / 4, dotSize, dotSize);
-    ellipse(-size.x / 4, -size.y / 4, dotSize, dotSize);
+    drawDieDots(4, 0, 0, size.average(), color(0, 0, 0));
     popMatrix();
     // 5
     pushMatrix();
     translate(-size.z / 2 - lift, 0, 0);
     rotateY(HALF_PI);
-    ellipse(0, 0, dotSize, dotSize);
-    ellipse(size.x / 4, size.y / 4, dotSize, dotSize);
-    ellipse(-size.x / 4, size.y / 4, dotSize, dotSize);
-    ellipse(size.x / 4, -size.y / 4, dotSize, dotSize);
-    ellipse(-size.x / 4, -size.y / 4, dotSize, dotSize);
+    drawDieDots(5, 0, 0, size.average(), color(0, 0, 0));
     popMatrix();
     // 6
     pushMatrix();
     translate(0, 0, -size.z / 2 - lift);
     rotateX(PI);
-    ellipse(size.x / 4, size.y / 4, dotSize, dotSize);
-    ellipse(size.x / 4, 0, dotSize, dotSize);
-    ellipse(size.x / 4, -size.y / 4, dotSize, dotSize);
-    ellipse(-size.x / 4, size.y / 4, dotSize, dotSize);
-    ellipse(-size.x / 4, 0, dotSize, dotSize);
-    ellipse(-size.x / 4, -size.y / 4, dotSize, dotSize);
+    drawDieDots(6, 0, 0, size.average(), color(0, 0, 0));
     popMatrix();
   }
 }
@@ -430,5 +392,50 @@ class Vector3 {
 
   float magnitude() {
     return (float)Math.sqrt((x * x) + (y * y) + (z * z));
+  }
+}
+
+// utility functions
+void translateWorld(Vector3 translation) {
+  translate(translation.x, translation.y, translation.z);
+}
+
+void rotateWorld(Vector3 rotation) {
+  rotateX(rotation.x);
+  rotateY(rotation.y);
+  rotateZ(rotation.z);
+}
+
+void boxWorld(Vector3 size) {
+  box(size.x, size.y, size.z);
+}
+
+void drawDieFace(int n, float x, float y, float size, color backgroundColor, color dotColor) {
+  fill(dotColor);
+  stroke(0, 0, 0);
+  strokeWeight(4);
+  rect(x, y, size, size);
+  draw(n, x, y, size, backgroundColor);
+  drawDieDots(n, x, y, size, dotColor);
+}
+
+void drawDieDots(int n, float x, float y, float size, color dotColor) {
+  fill(dotColor);
+  noStroke();
+  float dotSize = size / 5;
+  if (n == 1 || n == 3 || n == 5) {
+    ellipse(x, y, dotSize, dotSize);
+  }
+  if (n >= 2) {
+    ellipse(x - size / 4, y - size / 4, dotSize, dotSize);
+    ellipse(x + size / 4, y + size / 4, dotSize, dotSize);
+  }
+  if (n >= 4) {
+    ellipse(x - size / 4, y + size / 4, dotSize, dotSize);
+    ellipse(x + size / 4, y - size / 4, dotSize, dotSize);
+  }
+  if (n == 6) {
+    ellipse(x - size / 4, y, dotSize, dotSize);
+    ellipse(x + size / 4, y, dotSize, dotSize);
   }
 }
