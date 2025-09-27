@@ -64,8 +64,8 @@ void handleInput() {
     float maxpower = 500;
     float power = Math.min(500, Math.sqrt(dmouseX * dmouseX + dmouseY * dmouseY));
 
-    float cameraLookX = ()
-    float cameraHorizontalAngle = 
+    float cameraHorizontalAngle = Math.atan2(camera.lookVector.z, camera.lookVector.x);
+    float cameraVerticalAngle = radians(45) * (power / maxpower);
     float horizontalAngle = 0;
   }
 
@@ -291,8 +291,11 @@ class Die extends PhysicsInstance {
 
 class cameraInstance extends PVInstance {
   Vector3 center;
+  Vector3 lookVector;
+
   cameraInstance() {
     center = new Vector3(0, 0, 0);
+    lookVector = new Vector3(0, 0, -1);
   }
 
   void update() {
@@ -303,6 +306,7 @@ class cameraInstance extends PVInstance {
       position = position.add(die.position.subtract(position).subtract(die.velocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
     }
     center = die.position.copy();
+    lookVector = center.subtract(position).unit();
   }
 }
 
