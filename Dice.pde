@@ -1,11 +1,14 @@
 // fine red rgb(255, 40, 67)
 // beige rgb(255, 236, 207)
+float FLOAT_PRECISION = 1.1920929E-7;
+
 int FRAME_RATE = 60;
 float FRAME_INTERVAL = 1.0 / FRAME_RATE;
 float GRAVITY = 981;
-float FLOOR_HEIGHT = 30;
+float FLOOR_POSITION = 500;
 float DIE_CONTROL_MAX_VELOCITY = 2500;
 float DIE_STOP_SPEED_THRESHOLD = 0.1;
+float DIE_LAUNCH_MAX_POWER = 1600;
 
 int INITIAL_CANVAS_WIDTH = 750;
 int INITIAL_CANVAS_HEIGHT = 750;
@@ -13,9 +16,12 @@ int INITIAL_CANVAS_HEIGHT = 750;
 ArrayList<Instance> instanceList = new ArrayList<Instance>();
 
 Die die = new Die();
-PVInstance focus;
-PVInstance cameraInstance = new PVInstance();
+CameraInstance cameraInstance = new CameraInstance();
 boolean pmousePressed = mousePressed;
+
+int pmillis = -1;
+float seconds = 0;
+float deltaSeconds = 0;
 
 void settings() {
   size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P3D);
@@ -25,23 +31,29 @@ void settings() {
 void setup() {
   frameRate(FRAME_RATE);
   
-  die.position.x = width / 2;
+  die.position.x = 0;
   die.position.y = die.size.magnitude();
+  cameraInstance.center = die.position;
+  cameraInstance.position = new Vector3(0, -6000, -3000);
 }
 
-int pmillis = -1;
 void draw() {
+  updateTime();
   cameraInstance.update();
   handleInput();
-
-  if (pmillis == -1) {
-    pmillis = millis();
-  }
-  physicsStep((millis() - pmillis) / 1000.0);
-  pmillis = millis();
+  physicsStep(deltaSeconds);
   
   drawWorld();
   drawUI();
+}
+
+void updateTime() {
+  if (pmillis == -1) {
+    pmillis = millis();
+  }
+  seconds = millis() / 1000.0;
+  deltaSeconds = (millis() - pmillis) / 1000.0;
+  pmillis = millis();
 }
 
 void handleInput() {
@@ -59,17 +71,19 @@ void handleInput() {
   //  die.velocity = velocity;
   //}
   if (mouseReleased) {
-    float dmouseX = mouseX - (width / 2);
-    float dmouseY = mouseY - (height / 2);
-    float maxpower = 500;
-    float power = Math.min(500, Math.sqrt(dmouseX * dmouseX + dmouseY * dmouseY));
+    float dmouseX = mouseX - ((float)width / 2);
+    float dmouseY = mouseY - ((float)height / 2);
+    float power = Math.min(DIE_LAUNCH_MAX_POWER, 3 * (float)Math.sqrt(dmouseX * dmouseX + dmouseY * dmouseY));
 
-    float cameraHorizontalAngle = Math.atan2(camera.lookVector.z, camera.lookVector.x);
-    float cameraVerticalAngle = radians(45) * (power / maxpower);
-    float horizontalAngle = 0;
+    float cameraHorizontalAngle = (float)Math.atan2(cameraInstance.center.z - cameraInstance.position.z, cameraInstance.center.x - cameraInstance.position.x);
+    float mouseAngle = (float)Math.atan2(dmouseY, dmouseX) - HALF_PI;
+    float horizontalAngle = cameraHorizontalAngle + mouseAngle;
+    float verticalAngle = radians(45) * -(power / DIE_LAUNCH_MAX_POWER);
+    
+    die.velocity = new Vector3((float)Math.cos(horizontalAngle), (float)Math.sin(verticalAngle), (float)Math.sin(horizontalAngle)).multiply(power);
   }
 
-  pmousePressed = mousePressed
+  pmousePressed = mousePressed;
 }
 
 void physicsStep(float deltaTime) {
@@ -80,7 +94,7 @@ void physicsStep(float deltaTime) {
   float boundRadius = die.size.average() / 2;
 
   die.grounded = die.velocity.y < GRAVITY * deltaTime + 5;
-  if (die.position.y >= height - FLOOR_HEIGHT - boundRadius) {
+  if (die.position.y >= FLOOR_POSITION - boundRadius) {
     if (die.grounded) {
       Vector3 error = die.rotation.divide(HALF_PI).round().multiply(HALF_PI).subtract(die.rotation);
       float smooth = Math.max(Math.min(3, die.velocity.magnitude() / 10), 1.5);
@@ -94,8 +108,13 @@ void physicsStep(float deltaTime) {
     } else {
       die.velocity.y = 0;
     }
-    die.position.y = height - FLOOR_HEIGHT - boundRadius;
-    die.velocity.x /= 1 + ((deltaTime / FRAME_INTERVAL) * 0.3);
+    die.position.y = FLOOR_POSITION - boundRadius;
+    
+    Vector3 horizontalVelocity = new Vector3(die.velocity.x, 0, die.velocity.z);
+    float friction = 1 / (1 + ((deltaTime / FRAME_INTERVAL) * 0.3));
+    horizontalVelocity = horizontalVelocity.unit().multiply(horizontalVelocity.magnitude() *friction);
+    die.velocity.x = horizontalVelocity.x;
+    die.velocity.z = horizontalVelocity.z;
   } else {
     die.rotation = die.rotation.add(die.velocity.multiply(deltaTime).multiply(0.01).absolute());
   }
@@ -104,9 +123,17 @@ void physicsStep(float deltaTime) {
 // draw functions
 void drawWorld() {
   hint(ENABLE_DEPTH_TEST);
+  float eyeX = cameraInstance.position.x;
+  float eyeZ = cameraInstance.position.z;
+  if (eyeX == cameraInstance.center.x) {
+    eyeX += FLOAT_PRECISION;
+  }
+  if (eyeZ == cameraInstance.center.z) {
+    eyeZ += FLOAT_PRECISION;
+  }
   camera(
-    cameraInstance.position.x - (width / 2.0), cameraInstance.position.y - (height / 2.0), cameraInstance.position.z - ((height / 2.0) / tan(PI * 30.0 / 180)),
-    camera.center.x, camera.center.y, camera.center.z,
+    eyeX, cameraInstance.position.y, eyeZ,
+    cameraInstance.center.x, cameraInstance.center.y, cameraInstance.center.z,
     0, 1, 0
   );
   lights();
@@ -124,15 +151,15 @@ void drawGround() {
   fill(37, 129, 57);
   stroke(0, 0, 0);
   strokeWeight(12);
-  translateWorld(new Vector3(die.position.x, height - FLOOR_HEIGHT + 16, die.position.z));
+  translateWorld(new Vector3(cameraInstance.position.x, FLOOR_POSITION + 16, cameraInstance.position.z));
   rotateX(radians(90));
-  float scale = Math.min(Math.max(width, height) * 12, 3000);
+  float scale = Math.min(Math.max(width, height) * 5, 8000);
   ellipse(0, 0, scale, scale);
   popMatrix();
 }
 
 void drawShadow(Vector3 position) {
-  float diceHeight = (height - FLOOR_HEIGHT - die.size.magnitude() / 2) - die.position.y;
+  float diceHeight = (FLOOR_POSITION - die.size.magnitude() / 2) - die.position.y;
   float shadowSize = die.size.magnitude() - diceHeight;
   if (shadowSize <= 0) {
     return;
@@ -140,7 +167,7 @@ void drawShadow(Vector3 position) {
   pushMatrix();
   fill(50, 50, 50, shadowSize);
   noStroke();
-  translateWorld(new Vector3(position.x, height - FLOOR_HEIGHT - 0.01 + 4, position.z));
+  translateWorld(new Vector3(position.x, FLOOR_POSITION - 0.01 + 4, position.z));
   rotateX(HALF_PI);
   ellipse(0, 0, shadowSize, shadowSize);
   popMatrix();
@@ -164,7 +191,19 @@ void drawUI() {
 }
 
 void drawLaunchCharge() {
-
+  if (mousePressed == false) {
+    return;
+  }
+  int dmouseX = mouseX - (width / 2);
+  int dmouseY = mouseY - (height / 2);
+  fill(255, 100, 0, 150);
+  int amt = 10;
+  float exp = 0.8;
+  float sizeMultiplier = 1.5 - ((float)Math.sqrt(dmouseX * dmouseX + dmouseY * dmouseY) / (float)Math.sqrt(width * width / 4 + height * height / 4));
+  for (int i = 1; i <= amt; i++) {
+    float size = sizeMultiplier * (i * 2 + 5);
+    ellipse(width / 2 + dmouseX * (float)Math.pow((float)i / amt, exp), height / 2 + dmouseY * (float)Math.pow((float)i / amt, exp), size, size);
+  }
 }
 
 // utility functions
@@ -217,13 +256,18 @@ class PhysicsInstance extends PVInstance {
     super();
   }
 }
+
 class Die extends PhysicsInstance {
   boolean grounded = false;
+  
   Die() {
     super();
   }
   
   void draw() {
+    if (position.subtract(cameraInstance.position).magnitude() < size.magnitude()) {
+      return;
+    }
     fill(255, 255, 255);
     stroke(0, 0, 0);
     strokeWeight(4);
@@ -232,7 +276,7 @@ class Die extends PhysicsInstance {
     boxWorld(this.size);
 
     int lift = 1;
-    int dotSize = size.average() / 5;
+    float dotSize = size.average() / 5;
     fill(0, 0, 0);
     noStroke();
     // 1
@@ -289,23 +333,33 @@ class Die extends PhysicsInstance {
   }
 }
 
-class cameraInstance extends PVInstance {
+class CameraInstance extends PVInstance {
   Vector3 center;
   Vector3 lookVector;
 
-  cameraInstance() {
+  CameraInstance() {
     center = new Vector3(0, 0, 0);
     lookVector = new Vector3(0, 0, -1);
   }
 
   void update() {
-    if (die.velocity.magnitude() <= DIE_STOP_SPEED_THRESHOLD && die.grounded) {
-      Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(millis() / 1000.0), 300 + 200 * (float)Math.sin(millis() / 1000.0), 1000 * (float)Math.cos(millis() / 1000.0));
-      position = position.add(die.position.subtract(position).subtract(goalPosition).divide(10));
+    Vector3 pcenter = center.copy();
+    center = center.add(die.position.subtract(center).divide(10));
+    Vector3 centerVelocity;
+    if (deltaSeconds == 0) {
+      centerVelocity = new Vector3(0, 0, 0);
     } else {
-      position = position.add(die.position.subtract(position).subtract(die.velocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
+      centerVelocity = center.subtract(pcenter).divide(deltaSeconds);
     }
-    center = die.position.copy();
+    if (die.velocity.magnitude() <= DIE_STOP_SPEED_THRESHOLD && die.grounded) {
+      Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(seconds), 300 + 200 * (float)Math.sin(seconds), 1000 * (float)Math.cos(seconds));
+      position = position.add(center.subtract(position).subtract(goalPosition).divide(10));
+    } else {
+      position = position.add(center.subtract(position).subtract(centerVelocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
+    }
+    if (position.y > FLOOR_POSITION - FLOAT_PRECISION) {
+      position.y = FLOOR_POSITION - FLOAT_PRECISION;
+    }
     lookVector = center.subtract(position).unit();
   }
 }
