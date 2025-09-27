@@ -15,8 +15,30 @@ int INITIAL_CANVAS_HEIGHT = 750;
 
 ArrayList<Instance> instanceList = new ArrayList<Instance>();
 
+boolean gameOn = false;
+
+// game objects
 Die die = new Die();
 CameraInstance cameraInstance = new CameraInstance();
+
+// ui objects
+ArrayList<UIInstance> homeDiceList = new ArrayList<UIInstance>();
+{
+  // top row
+  homeDiceList.add(new DieIcon(0, -225, -150, 100, color(255, 0, 0), color(128, 0, 0)));
+  homeDiceList.add(new DieIcon(0, -75, -150, 100, color(255, 70, 0), color(128, 35, 0)));
+  homeDiceList.add(new DieIcon(0, 75, -150, 100, color(255, 255, 0), color(128, 128, 0)));
+  homeDiceList.add(new DieIcon(0, 225, -150, 100, color(0, 255, 0), color(0, 128, 0)));
+  // middle row
+  homeDiceList.add(new DieIcon(0, -150, 0, 100, color(0, 0, 255), color(0, 0, 128)));
+  homeDiceList.add(new DieIcon(0, 0, 0, 100, color(64, 0, 172), color(32, 0, 86)));
+  homeDiceList.add(new DieIcon(0, 150, 0, 100, color(128, 0, 128), color(64, 0, 64)));
+  // bottom row
+  homeDiceList.add(new DieIcon(0, -75, 150, 100, color(255, 255, 255), color(0, 0, 0)));
+  homeDiceList.add(new DieIcon(0, 75, 150, 100, color(0, 0, 0), color(255, 255, 255)));
+}
+
+
 boolean pmousePressed = mousePressed;
 
 int pmillis = -1;
@@ -29,6 +51,7 @@ void settings() {
 }
 
 void setup() {
+  rectMode(CENTER);
   frameRate(FRAME_RATE);
   
   die.position.x = 0;
@@ -39,7 +62,7 @@ void setup() {
 
 void draw() {
   updateTime();
-  cameraInstance.update();
+  updateInstances();
   handleInput();
   physicsStep(deltaSeconds);
   
@@ -56,21 +79,17 @@ void updateTime() {
   pmillis = millis();
 }
 
+void updateInstances() {
+  int startSize = instanceList.size();
+  for (int i = 0; i < startSize; i++) {
+    instanceList.get(i - (startSize - instanceList.size())).update();
+  }
+}
+
 void handleInput() {
   boolean mouseReleased = pmousePressed && !mousePressed;
 
-  //if (mousePressed == true) {
-  //  die.rotation.x += 0.1;
-  //  //die.rotation.y += 0.1;
-  //  //die.rotation.z += 0.1;
-  //
-  //  Vector3 velocity = new Vector3(mouseX - die.position.x, mouseY - die.position.y, 0).multiply(15);
-  //  if (velocity.magnitude() > DIE_CONTROL_MAX_VELOCITY) {
-  //    velocity = velocity.unit().multiply(DIE_CONTROL_MAX_VELOCITY);
-  //  }
-  //  die.velocity = velocity;
-  //}
-  if (mouseReleased) {
+  if (mouseReleased && gameOn) {
     float dmouseX = mouseX - ((float)width / 2);
     float dmouseY = mouseY - ((float)height / 2);
     float power = Math.min(DIE_LAUNCH_MAX_POWER, 4 * (float)Math.sqrt(dmouseX * dmouseX + dmouseY * dmouseY));
@@ -138,13 +157,12 @@ void drawWorld() {
     0, 1, 0
   );
   float fov = PI/3.0;
-  float cameraZ = (height/2.0) / tan(fov/2.0);
   perspective(fov, (float)width/(float)height, 4, 640000);
   lights();
   background(135, 206, 235);
   drawGround();
   drawShadow(die.position);
-  drawInstances();
+  drawPVInstances();
   popMatrix();
 }
 
@@ -176,10 +194,14 @@ void drawShadow(Vector3 position) {
   popMatrix();
 }
 
-void drawInstances() {
+void drawPVInstances() {
   for (int i = 0; i < instanceList.size(); i++) {
+    Instance instance = instanceList.get(i);
+    if (instance instanceof PVInstance == false) {
+      continue;
+    }
     pushMatrix();
-    instanceList.get(i).draw();
+    instance.draw();
     popMatrix();
   }
 }
@@ -189,8 +211,26 @@ void drawUI() {
   camera();
   noLights();
   pushMatrix();
-  drawLaunchCharge();
+
+  // game on ui
+  if (gameOn) {
+    drawLaunchCharge();
+  } else {
+    drawHomeScreen();
+  }
+
   popMatrix();
+}
+
+void drawHomeScreen() {
+  // background
+  fill(200, 200, 200);
+  noStroke();
+
+  // dice
+  for (int i = 0; i < homeDiceList.size(); i++) {
+    homeDiceList.get(i).draw();
+  }
 }
 
 void drawLaunchCharge() {
@@ -216,11 +256,13 @@ void drawLaunchCharge() {
 }
 
 // utility classes
-class Instance {
+abstract class Instance {
   
   Instance() {
     instanceList.add(this);
   }
+
+  void update() {}
   
   void draw() {}
 
@@ -229,9 +271,56 @@ class Instance {
   }
 }
 
+class UIInstance extends Instance {
+  boolean visible;
+  float x;
+  float y;
+
+  UIInstance() {
+    super();
+    visible = true;
+  }
+  
+  void rect(float x, float y, float w, float h) {
+    rect(x + this.x + width / 2, y + this.y + height / 2, w, h);
+  }
+
+  void ellipse(float x, float y, float w, float h) {
+    ellipse(x + this.x + width / 2, y + this.y + height / 2, w, h);
+  }
+}
+
+class DieIcon extends UIInstance {
+  int n;
+  float size;
+  color backgroundColor;
+  color dotColor;
+
+  DieIcon(int n, float x, float y, float size, color backgroundColor, color dotColor) {
+    super();
+    this.n = n;
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.backgroundColor = backgroundColor;
+    this.dotColor = dotColor;
+  }
+
+  void draw() {
+    if (visible == false) {
+      return;
+    }
+    drawDieFace(n, x + width / 2, y + height / 2, size, backgroundColor, dotColor);
+  }
+}
+
 class PVInstance extends Instance {
   Vector3 position = new Vector3(0, 0, 0);
   Vector3 rotation = new Vector3(0, 0, 0);
+
+  PVInstance() {
+    super();
+  }
 }
 
 class PhysicsInstance extends PVInstance {
@@ -323,7 +412,8 @@ class CameraInstance extends PVInstance {
       Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(seconds), 300 + 200 * (float)Math.sin(seconds), 1000 * (float)Math.cos(seconds));
       position = position.add(center.subtract(position).subtract(goalPosition).divide(10));
     } else {
-      position = position.add(center.subtract(position).subtract(centerVelocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
+      Vector3 goalPosition = centerVelocity.unit().multiply(1000).add(new Vector3(0, 250, 0));
+      position = position.add(center.subtract(position).subtract(goalPosition).divide(25));
     }
     if (position.y > FLOOR_POSITION - 25) {
       position.y = FLOOR_POSITION - 25;
@@ -412,11 +502,12 @@ void boxWorld(Vector3 size) {
 }
 
 void drawDieFace(int n, float x, float y, float size, color backgroundColor, color dotColor) {
-  fill(dotColor);
-  stroke(0, 0, 0);
-  strokeWeight(4);
+  fill(backgroundColor);
+  noStroke();
   rect(x, y, size, size);
-  drawDieDots(n, x + size / 2, y + size / 2, size, dotColor);
+  if (n > 0) {
+    drawDieDots(n, x, y, size, dotColor);
+  }
 }
 
 void drawDieDots(int n, float x, float y, float size, color dotColor) {
