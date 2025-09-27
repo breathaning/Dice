@@ -31,7 +31,7 @@ void setup() {
 
 int pmillis = -1;
 void draw() {
-  updateCamera();
+  cameraInstance.update();
   handleInput();
 
   if (pmillis == -1) {
@@ -59,7 +59,14 @@ void handleInput() {
   //  die.velocity = velocity;
   //}
   if (mouseReleased) {
-    
+    float dmouseX = mouseX - (width / 2);
+    float dmouseY = mouseY - (height / 2);
+    float maxpower = 500;
+    float power = Math.min(500, Math.sqrt(dmouseX * dmouseX + dmouseY * dmouseY));
+
+    float cameraLookX = ()
+    float cameraHorizontalAngle = 
+    float horizontalAngle = 0;
   }
 
   pmousePressed = mousePressed
@@ -95,20 +102,11 @@ void physicsStep(float deltaTime) {
 }
 
 // draw functions
-void updateCamera() {
-  if (die.velocity.magnitude() <= DIE_STOP_SPEED_THRESHOLD && die.grounded) {
-    Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(millis() / 1000.0), 300 + 200 * (float)Math.sin(millis() / 1000.0), 1000 * (float)Math.cos(millis() / 1000.0));
-    cameraInstance.position = cameraInstance.position.add(die.position.subtract(cameraInstance.position).subtract(goalPosition).divide(10));
-  } else {
-    cameraInstance.position = cameraInstance.position.add(die.position.subtract(cameraInstance.position).subtract(die.velocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
-  }
-}
-
 void drawWorld() {
   hint(ENABLE_DEPTH_TEST);
   camera(
     cameraInstance.position.x - (width / 2.0), cameraInstance.position.y - (height / 2.0), cameraInstance.position.z - ((height / 2.0) / tan(PI * 30.0 / 180)),
-    die.position.x, die.position.y, die.position.z,
+    camera.center.x, camera.center.y, camera.center.z,
     0, 1, 0
   );
   lights();
@@ -288,6 +286,23 @@ class Die extends PhysicsInstance {
     ellipse(-size.x / 4, 0, dotSize, dotSize);
     ellipse(-size.x / 4, -size.y / 4, dotSize, dotSize);
     popMatrix();
+  }
+}
+
+class cameraInstance extends PVInstance {
+  Vector3 center;
+  cameraInstance() {
+    center = new Vector3(0, 0, 0);
+  }
+
+  void update() {
+    if (die.velocity.magnitude() <= DIE_STOP_SPEED_THRESHOLD && die.grounded) {
+      Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(millis() / 1000.0), 300 + 200 * (float)Math.sin(millis() / 1000.0), 1000 * (float)Math.cos(millis() / 1000.0));
+      position = position.add(die.position.subtract(position).subtract(goalPosition).divide(10));
+    } else {
+      position = position.add(die.position.subtract(position).subtract(die.velocity.unit().multiply(1000).add(new Vector3(0, 250, 0))).divide(25));
+    }
+    center = die.position.copy();
   }
 }
 
