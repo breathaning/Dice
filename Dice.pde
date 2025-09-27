@@ -25,7 +25,7 @@ float deltaSeconds = 0;
 
 void settings() {
   size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P3D);
-  smooth(2);
+  smooth(4);
 }
 
 void setup() {
@@ -137,6 +137,9 @@ void drawWorld() {
     cameraInstance.center.x, cameraInstance.center.y, cameraInstance.center.z,
     0, 1, 0
   );
+  float fov = PI/3.0;
+  float cameraZ = (height/2.0) / tan(fov/2.0);
+  perspective(fov, (float)width/(float)height, 4, 640000);
   lights();
   background(135, 206, 235);
   drawGround();
@@ -201,10 +204,11 @@ void drawLaunchCharge() {
   }
   float dmouseX = dmouseVector.x;
   float dmouseY = dmouseVector.y;
-  fill(255, 100, 0, 150);
   int amt = 10;
   float exp = 0.8;
   float sizeMultiplier = 1.5 - ((float)Math.sqrt(dmouseX * dmouseX + dmouseY * dmouseY) / (float)Math.sqrt(width * width / 4 + height * height / 4));
+  noStroke();
+  fill(255, 255, 255, 150);
   for (int i = 1; i <= amt; i++) {
     float size = sizeMultiplier * (i * 2 + 5);
     ellipse(width / 2 + dmouseX * (float)Math.pow((float)i / amt, exp), height / 2 + dmouseY * (float)Math.pow((float)i / amt, exp), size, size);
