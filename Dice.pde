@@ -262,9 +262,6 @@ class Die extends PhysicsInstance {
     boxWorld(this.size);
 
     int lift = 1;
-    float dotSize = size.average() / 5;
-    fill(0, 0, 0);
-    noStroke();
     // 1
     pushMatrix();
     translate(0, 0, size.z / 2 + lift);
@@ -419,8 +416,7 @@ void drawDieFace(int n, float x, float y, float size, color backgroundColor, col
   stroke(0, 0, 0);
   strokeWeight(4);
   rect(x, y, size, size);
-  draw(n, x, y, size, backgroundColor);
-  drawDieDots(n, x, y, size, dotColor);
+  drawDieDots(n, x + size / 2, y + size / 2, size, dotColor);
 }
 
 void drawDieDots(int n, float x, float y, float size, color dotColor) {
