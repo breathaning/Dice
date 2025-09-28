@@ -585,7 +585,7 @@ void startGame() {
   die.position.y = die.size.magnitude();
   die.position.z = 0;
   die.velocity = new Vector3(0, 0, 0);
-  die.rotation = new Vector3(Math.random() * TWO_PI, Math.random() * TWO_PI, Math.random() * TWO_PI);
+  die.rotation = new Vector3((float)Math.random() * TWO_PI, (float)Math.random() * TWO_PI, (float)Math.random() * TWO_PI);
   cameraInstance.center = die.position;
   cameraInstance.position = new Vector3(0, -6000, -3000);
   gameOn = true;
