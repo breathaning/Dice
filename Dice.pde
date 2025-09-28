@@ -180,8 +180,13 @@ void drawWorld() {
     0, 1, 0
   );
   float fov = PI/3.0;
-  perspective(fov, (float)width/(float)height, 4, 640000);
+  pushMatrix();
+  translateWorld(cameraInstance.position);
   lights();
+  lightFalloff(0.5, 0.00015, 0.0);
+  popMatrix();
+
+  perspective(fov, (float)width/(float)height, 4, 640000);
   background(135, 206, 235);
   drawGround();
   drawShadow(die.position);
