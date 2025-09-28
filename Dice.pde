@@ -181,7 +181,9 @@ void mouseReleased() {
 
 void setLaunchPower() {
   if ((dmouseX != 0 || dmouseY != 0) && Math.hypot(dmouseX, dmouseY) >= DIE_LAUNCH_MOUSE_DEADZONE) {
-    dieLaunchPower = DIE_LAUNCH_MIN_POWER +  Math.min(DIE_LAUNCH_MAX_POWER, 4 * (float)Math.hypot(dmouseX, dmouseY));
+    float bound = Math.min(width, height) / 2 * 0.9;
+    float rawLaunchPower = (DIE_LAUNCH_MAX_POWER - DIE_LAUNCH_MIN_POWER) * ((float)Math.hypot(dmouseX, dmouseY)) / bound;
+    dieLaunchPower = Math.min(DIE_LAUNCH_MAX_POWER, DIE_LAUNCH_MIN_POWER + rawLaunchPower);
   } else {
     dieLaunchPower = 0;
   }
