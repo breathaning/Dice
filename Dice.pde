@@ -21,9 +21,12 @@ boolean gameOn = false;
 Die die = new Die();
 CameraInstance cameraInstance = new CameraInstance();
 
-// ui objects
+// home screen
+ArrayList<UIInstance> homeInstanceList = new ArrayList<UIInstance>();
 ArrayList<UIInstance> homeDiceList = new ArrayList<UIInstance>();
 {
+  // text
+  homeInstanceList.add(new TextInstance("Click the blank dice to roll them!", 0, -300, 32, color(0, 0, 0)));
   // top row
   homeDiceList.add(new DieIcon(0, -225, -150, 100, color(255, 0, 0), color(128, 0, 0)));
   homeDiceList.add(new DieIcon(0, -75, -150, 100, color(255, 70, 0), color(128, 35, 0)));
@@ -36,6 +39,11 @@ ArrayList<UIInstance> homeDiceList = new ArrayList<UIInstance>();
   // bottom row
   homeDiceList.add(new DieIcon(0, -75, 150, 100, color(255, 255, 255), color(0, 0, 0)));
   homeDiceList.add(new DieIcon(0, 75, 150, 100, color(0, 0, 0), color(255, 255, 255)));
+  for (int i = 0; i < homeDiceList.size(); i++) {
+    UIInstance icon = homeDiceList.get(i);
+    icon.clickable = true;
+    homeInstanceList.add(icon);
+  }
 }
 
 
@@ -53,18 +61,30 @@ void settings() {
 void setup() {
   rectMode(CENTER);
   frameRate(FRAME_RATE);
-  
-  die.position.x = 0;
-  die.position.y = die.size.magnitude();
-  cameraInstance.center = die.position;
-  cameraInstance.position = new Vector3(0, -6000, -3000);
+}
+
+void mouseClicked() {
+  for (int i = 0; i < instanceList.size(); i++) {
+    Instance instance = instanceList.get(i);
+    if (instance instanceof UIInstance == false) {
+      continue;
+    }
+    UIInstance uiInstance = (UIInstance)instance;
+    if (uiInstance.clickable && uiInstance.canClick()) {
+      uiInstance.onClick();
+      break;
+    }
+  }
 }
 
 void draw() {
   updateTime();
   updateInstances();
   handleInput();
-  physicsStep(deltaSeconds);
+
+  if (gameOn) {
+    physicsStep(deltaSeconds);
+  }
   
   drawWorld();
   drawUI();
@@ -162,7 +182,17 @@ void drawWorld() {
   background(135, 206, 235);
   drawGround();
   drawShadow(die.position);
-  drawPVInstances();
+  
+  for (int i = 0; i < instanceList.size(); i++) {
+    Instance instance = instanceList.get(i);
+    if (instance instanceof PVInstance == false) {
+      continue;
+    }
+    pushMatrix();
+    instance.draw();
+    popMatrix();
+  }
+
   popMatrix();
 }
 
@@ -194,18 +224,6 @@ void drawShadow(Vector3 position) {
   popMatrix();
 }
 
-void drawPVInstances() {
-  for (int i = 0; i < instanceList.size(); i++) {
-    Instance instance = instanceList.get(i);
-    if (instance instanceof PVInstance == false) {
-      continue;
-    }
-    pushMatrix();
-    instance.draw();
-    popMatrix();
-  }
-}
-
 void drawUI() {
   hint(DISABLE_DEPTH_TEST);
   camera();
@@ -219,6 +237,16 @@ void drawUI() {
     drawHomeScreen();
   }
 
+  for (int i = 0; i < instanceList.size(); i++) {
+    Instance instance = instanceList.get(i);
+    if (instance instanceof UIInstance == false) {
+      continue;
+    }
+    pushMatrix();
+    instance.draw();
+    popMatrix();
+  }
+
   popMatrix();
 }
 
@@ -226,11 +254,7 @@ void drawHomeScreen() {
   // background
   fill(200, 200, 200);
   noStroke();
-
-  // dice
-  for (int i = 0; i < homeDiceList.size(); i++) {
-    homeDiceList.get(i).draw();
-  }
+  rect(width / 2, height / 2, width, height);
 }
 
 void drawLaunchCharge() {
@@ -272,13 +296,15 @@ abstract class Instance {
 }
 
 class UIInstance extends Instance {
-  boolean visible;
   float x;
   float y;
+  boolean visible;
+  boolean clickable;
 
   UIInstance() {
     super();
     visible = true;
+    clickable = false;
   }
   
   void rect(float x, float y, float w, float h) {
@@ -287,6 +313,40 @@ class UIInstance extends Instance {
 
   void ellipse(float x, float y, float w, float h) {
     ellipse(x + this.x + width / 2, y + this.y + height / 2, w, h);
+  }
+
+  boolean canClick() {
+    return false;
+  }
+
+  void onClick() {
+    System.out.println("UIInstance clicked");
+  }
+}
+
+class TextInstance extends UIInstance {
+  String textString;
+  int fontSize;
+  color textColor;
+  
+  TextInstance(String textString, float x, float y, int fontSize, color textColor) {
+    super();
+    this.textString = textString;
+    this.x = x;
+    this.y = y;
+    this.fontSize = fontSize;
+    this.textColor = textColor;
+  }
+  
+  void draw() {
+    if (visible == false) {
+      return;
+    }
+    fill(textColor);
+    noStroke();
+    textAlign(CENTER, CENTER);
+    textSize(fontSize);
+    text(textString, x + width / 2, y + height / 2);
   }
 }
 
@@ -312,6 +372,29 @@ class DieIcon extends UIInstance {
     }
     drawDieFace(n, x + width / 2, y + height / 2, size, backgroundColor, dotColor);
   }
+
+  boolean canClick() {
+    if (visible == false) {
+      return false;
+    }
+    float screenX = x + width / 2;
+    float screenY = y + height / 2;
+    return (mouseX >= screenX - size / 2 && mouseX <= screenX + size / 2 && mouseY >= screenY - size / 2 && mouseY <= screenY + size / 2);
+  }
+
+  void onClick() {
+    if (gameOn) {
+      return;
+    }
+    for (int i = 0; i < homeInstanceList.size(); i++) {
+      UIInstance instance = homeInstanceList.get(i);
+      instance.clickable = false;
+      instance.visible = false;
+    }
+    startGame();
+    die.faceColor = backgroundColor;
+    die.dotColor = dotColor;
+  }
 }
 
 class PVInstance extends Instance {
@@ -334,17 +417,21 @@ class PhysicsInstance extends PVInstance {
 
 class Die extends PhysicsInstance {
   boolean grounded = false;
+  color faceColor;
+  color dotColor;
   
   Die() {
     super();
+    faceColor = color(255, 255, 255);
+    dotColor = color(0, 0, 0);
   }
   
   void draw() {
     if (position.subtract(cameraInstance.position).magnitude() < size.magnitude()) {
       return;
     }
-    fill(255, 255, 255);
-    stroke(0, 0, 0);
+    fill(faceColor);
+    stroke(dotColor);
     strokeWeight(4);
     translateWorld(position);
     rotateWorld(rotation);
@@ -354,49 +441,47 @@ class Die extends PhysicsInstance {
     // 1
     pushMatrix();
     translate(0, 0, size.z / 2 + lift);
-    drawDieDots(1, 0, 0, size.average(), color(0, 0, 0));
+    drawDieDots(1, 0, 0, size.average(), dotColor);
     popMatrix();
     // 2
     pushMatrix();
     translate(size.x / 2 + lift, 0, 0);
     rotateY(-HALF_PI);
-    drawDieDots(2, 0, 0, size.average(), color(0, 0, 0));
+    drawDieDots(2, 0, 0, size.average(), dotColor);
     popMatrix();
     // 3
     pushMatrix();
     translate(0, -size.y / 2 - lift, 0);
     rotateX(-HALF_PI);
     rotate(HALF_PI);
-    drawDieDots(3, 0, 0, size.average(), color(0, 0, 0));
+    drawDieDots(3, 0, 0, size.average(), dotColor);
     popMatrix();
     // 4
     pushMatrix();
     translate(0, size.y / 2 + lift, 0);
     rotateX(HALF_PI);
-    drawDieDots(4, 0, 0, size.average(), color(0, 0, 0));
+    drawDieDots(4, 0, 0, size.average(), dotColor);
     popMatrix();
     // 5
     pushMatrix();
     translate(-size.z / 2 - lift, 0, 0);
     rotateY(HALF_PI);
-    drawDieDots(5, 0, 0, size.average(), color(0, 0, 0));
+    drawDieDots(5, 0, 0, size.average(), dotColor);
     popMatrix();
     // 6
     pushMatrix();
     translate(0, 0, -size.z / 2 - lift);
     rotateX(PI);
-    drawDieDots(6, 0, 0, size.average(), color(0, 0, 0));
+    drawDieDots(6, 0, 0, size.average(), dotColor);
     popMatrix();
   }
 }
 
 class CameraInstance extends PVInstance {
   Vector3 center;
-  Vector3 lookVector;
 
   CameraInstance() {
     center = new Vector3(0, 0, 0);
-    lookVector = new Vector3(0, 0, -1);
   }
 
   void update() {
@@ -418,7 +503,6 @@ class CameraInstance extends PVInstance {
     if (position.y > FLOOR_POSITION - 25) {
       position.y = FLOOR_POSITION - 25;
     }
-    lookVector = center.subtract(position).unit();
   }
 }
 
@@ -487,6 +571,21 @@ class Vector3 {
 }
 
 // utility functions
+void startGame() {
+  die.position.x = 0;
+  die.position.y = die.size.magnitude();
+  die.position.z = 0;
+  die.velocity = new Vector3(0, 0, 0);
+  die.rotation = new Vector3(Math.random() * TWO_PI, Math.random() * TWO_PI, Math.random() * TWO_PI);
+  cameraInstance.center = die.position;
+  cameraInstance.position = new Vector3(0, -6000, -3000);
+  gameOn = true;
+}
+
+void endGame() {
+  gameOn = false;
+}
+
 void translateWorld(Vector3 translation) {
   translate(translation.x, translation.y, translation.z);
 }
