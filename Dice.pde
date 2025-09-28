@@ -27,7 +27,7 @@ ArrayList<UIInstance> homeInstanceList = new ArrayList<UIInstance>();
 ArrayList<UIInstance> homeDiceList = new ArrayList<UIInstance>();
 {
   // text
-  homeInstanceList.add(new TextInstance("Click the blank dice to roll them!", 0, -300, 32, color(0, 0, 0)));
+  homeInstanceList.add(new TextInstance("Click the dice to roll them!", 0, -300, 32, color(0, 0, 0)));
   // top row
   homeDiceList.add(new DieIcon(0, -225, -150, 100, color(255, 0, 0), color(128, 0, 0)));
   homeDiceList.add(new DieIcon(0, -75, -150, 100, color(255, 70, 0), color(128, 35, 0)));
