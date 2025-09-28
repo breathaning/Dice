@@ -139,7 +139,7 @@ void physicsStep(float deltaTime) {
   if (die.position.y >= FLOOR_POSITION - boundRadius) {
     if (die.grounded) {
       Vector3 error = die.rotation.divide(HALF_PI).round().multiply(HALF_PI).subtract(die.rotation);
-      float cut = Math.max(Math.min(6, die.velocity.magnitude() / 10), 3) / deltaTick;
+      float cut = Math.max(1, Math.max(Math.min(6, die.velocity.magnitude() / 10), 3) / deltaTick);
       die.rotation = die.rotation.add(error.divide(cut));
       if (die.velocity.magnitude() < DIE_STOP_SPEED_THRESHOLD) {
         die.velocity = new Vector3(0, 0, 0);
@@ -208,7 +208,6 @@ void drawWorld() {
 
   popMatrix();
 }
-
 
 void drawGround() {
   pushMatrix();
@@ -500,7 +499,7 @@ class CameraInstance extends PVInstance {
 
   void update() {
     Vector3 pcenter = center.copy();
-    center = center.add(die.position.subtract(center).divide(20 / deltaTick));
+    center = center.add(die.position.subtract(center).divide(Math.max(1, 20 / deltaTick)));
     Vector3 centerVelocity;
     if (deltaSeconds == 0) {
       centerVelocity = new Vector3(0, 0, 0);
@@ -509,10 +508,10 @@ class CameraInstance extends PVInstance {
     }
     if (die.velocity.magnitude() <= DIE_STOP_SPEED_THRESHOLD && die.grounded) {
       Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(seconds), 300 + 200 * (float)Math.sin(seconds), 1000 * (float)Math.cos(seconds));
-      position = position.add(center.subtract(position).subtract(goalPosition).divide(10 / deltaTick));
+      position = position.add(center.subtract(position).subtract(goalPosition).divide(Math.max(1, 10 / deltaTick)));
     } else {
       Vector3 goalPosition = centerVelocity.unit().multiply(1000).add(new Vector3(0, 250, 0));
-      position = position.add(center.subtract(position).subtract(goalPosition).divide(25 / deltaTick));
+      position = position.add(center.subtract(position).subtract(goalPosition).divide(Math.max(1, 25 / deltaTick)));
     }
     if (position.y > FLOOR_POSITION - 25) {
       position.y = FLOOR_POSITION - 25;
