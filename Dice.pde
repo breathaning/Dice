@@ -168,7 +168,7 @@ void mouseDragged() {
 }
 
 void mouseReleased() {
-  if (gameOn && dieLaunchPower != 0) {
+  if (gameOn && launchStarted) {
     launchStarted = false;
     float cameraHorizontalAngle = (float)Math.atan2(cameraInstance.center.z - cameraInstance.position.z, cameraInstance.center.x - cameraInstance.position.x);
     float mouseAngle = (float)Math.atan2(dmouseY, dmouseX) - HALF_PI;
