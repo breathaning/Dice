@@ -2,7 +2,7 @@
 // beige rgb(255, 236, 207)
 float FLOAT_PRECISION = 1.1920929E-7;
 
-int FRAME_RATE = 480;
+int FRAME_RATE = -1; // uncapped?
 int SIMULATION_RATE = 60;
 float SIMULATION_INTERVAL = 1.0 / SIMULATION_RATE;
 float GRAVITY = 981;
