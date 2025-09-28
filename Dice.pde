@@ -100,6 +100,9 @@ void updateTime() {
   deltaSeconds = (millis() - pmillis) / 1000.0;
   deltaTick = deltaSeconds * SIMULATION_RATE;
   pmillis = millis();
+  try {
+    console.log(millis());
+  } 
 }
 
 void updateInstances() {
@@ -169,6 +172,9 @@ void drawWorld() {
   float eyeZ = cameraInstance.position.z;
   if (eyeX == cameraInstance.center.x) {
     eyeX += FLOAT_PRECISION;
+  }
+  if (eyeY == cameraInstance.center.y) {
+    eyeY += FLOAT_PRECISION;
   }
   if (eyeZ == cameraInstance.center.z) {
     eyeZ += FLOAT_PRECISION;
