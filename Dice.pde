@@ -182,7 +182,6 @@ void drawWorld() {
   float fov = PI/3.0;
   perspective(fov, (float)width/(float)height, 4, 640000);
   lights();
-  lightFalloff(0.5, 0.00015, 0.0)
   background(135, 206, 235);
   drawGround();
   drawShadow(die.position);
