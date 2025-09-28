@@ -100,9 +100,6 @@ void updateTime() {
   deltaSeconds = (millis() - pmillis) / 1000.0;
   deltaTick = deltaSeconds * SIMULATION_RATE;
   pmillis = millis();
-  try {
-    console.log(millis());
-  } 
 }
 
 void updateInstances() {
@@ -169,6 +166,7 @@ void physicsStep(float deltaTime) {
 void drawWorld() {
   hint(ENABLE_DEPTH_TEST);
   float eyeX = cameraInstance.position.x;
+  float eyeY = cameraInstance.position.y;
   float eyeZ = cameraInstance.position.z;
   if (eyeX == cameraInstance.center.x) {
     eyeX += FLOAT_PRECISION;
@@ -181,7 +179,7 @@ void drawWorld() {
   }
   pushMatrix();
   camera(
-    eyeX, cameraInstance.position.y, eyeZ,
+    eyeX, eyeY, eyeZ,
     cameraInstance.center.x, cameraInstance.center.y, cameraInstance.center.z,
     0, 1, 0
   );
