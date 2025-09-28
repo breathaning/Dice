@@ -22,30 +22,32 @@ ArrayList<Instance> instanceList = new ArrayList<Instance>();
 boolean gameOn = false;
 
 // game objects
-Die die = new Die();
+DiePhysicsInstance die = new DiePhysicsInstance();
 CameraInstance cameraInstance = new CameraInstance();
 float dieLaunchPower = 0;
 
 // home screen
 ArrayList<UIInstance> homeInstanceList = new ArrayList<UIInstance>();
-ArrayList<UIInstance> homeDiceList = new ArrayList<UIInstance>();
+ArrayList<Die> homeDieList = new ArrayList<Die>();
+TextInstance homeDiceTotalText = new TextInstance("Total: 0", 0, 300, 32, color(0, 0, 0));  
 {
   // text
   homeInstanceList.add(new TextInstance("Click the dice to roll them!", 0, -300, 32, color(0, 0, 0)));
+  homeInstanceList.add(homeDiceTotalText);
   // top row
-  homeDiceList.add(new DieIcon(0, -225, -150, 100, color(255, 0, 0), color(128, 0, 0)));
-  homeDiceList.add(new DieIcon(0, -75, -150, 100, color(255, 70, 0), color(128, 35, 0)));
-  homeDiceList.add(new DieIcon(0, 75, -150, 100, color(255, 255, 0), color(128, 128, 0)));
-  homeDiceList.add(new DieIcon(0, 225, -150, 100, color(0, 255, 0), color(0, 128, 0)));
+  homeDieList.add(new Die(0, -225, -150, 100, color(255, 0, 0), color(128, 0, 0)));
+  homeDieList.add(new Die(0, -75, -150, 100, color(255, 70, 0), color(128, 35, 0)));
+  homeDieList.add(new Die(0, 75, -150, 100, color(255, 255, 0), color(128, 128, 0)));
+  homeDieList.add(new Die(0, 225, -150, 100, color(0, 255, 0), color(0, 128, 0)));
   // middle row
-  homeDiceList.add(new DieIcon(0, -150, 0, 100, color(0, 0, 255), color(0, 0, 128)));
-  homeDiceList.add(new DieIcon(0, 0, 0, 100, color(64, 0, 172), color(32, 0, 86)));
-  homeDiceList.add(new DieIcon(0, 150, 0, 100, color(128, 0, 128), color(64, 0, 64)));
+  homeDieList.add(new Die(0, -150, 0, 100, color(0, 0, 255), color(0, 0, 128)));
+  homeDieList.add(new Die(0, 0, 0, 100, color(64, 0, 172), color(32, 0, 86)));
+  homeDieList.add(new Die(0, 150, 0, 100, color(128, 0, 128), color(64, 0, 64)));
   // bottom row
-  homeDiceList.add(new DieIcon(0, -75, 150, 100, color(255, 255, 255), color(0, 0, 0)));
-  homeDiceList.add(new DieIcon(0, 75, 150, 100, color(0, 0, 0), color(255, 255, 255)));
-  for (int i = 0; i < homeDiceList.size(); i++) {
-    UIInstance icon = homeDiceList.get(i);
+  homeDieList.add(new Die(0, -75, 150, 100, color(255, 255, 255), color(0, 0, 0)));
+  homeDieList.add(new Die(0, 75, 150, 100, color(0, 0, 0), color(255, 255, 255)));
+  for (int i = 0; i < homeDieList.size(); i++) {
+    UIInstance icon = homeDieList.get(i);
     icon.clickable = true;
     homeInstanceList.add(icon);
   }
@@ -107,50 +109,13 @@ void updateInstances() {
 }
 
 void physicsStep(float deltaTime) {
-  die.rotation = die.rotation.normalize(TWO_PI);
-  die.velocity.y += GRAVITY * deltaTime;
-  die.position = die.position.add(die.velocity.multiply(deltaTime));
-
-  float boundRadius = die.size.average() / 2;
-
-  die.grounded = die.velocity.y < GRAVITY * deltaTime + 5;
-  if (die.position.y >= FLOOR_POSITION - boundRadius) {
-    if (die.grounded) {
-      Vector3 error = die.rotation.divide(HALF_PI).round().multiply(HALF_PI).subtract(die.rotation);
-      float cut = Math.max(1, Math.max(Math.min(6, die.velocity.magnitude() / 10), 3) / deltaTick);
-      die.rotation = die.rotation.add(error.divide(cut));
-      if (die.velocity.magnitude() < DIE_STOP_SPEED_THRESHOLD) {
-        die.velocity = new Vector3(0, 0, 0);
-      }
-    }
-    if (die.velocity.y > GRAVITY * deltaTime + 1) {
-      die.velocity.y *= -0.3;
-    } else {
-      die.velocity.y = 0;
-    }
-    die.position.y = FLOOR_POSITION - boundRadius;
-    
-    Vector3 horizontalVelocity = new Vector3(die.velocity.x, 0, die.velocity.z);
-    float friction = 1 / (1 + ((deltaTime * SIMULATION_RATE) * 0.3));
-    horizontalVelocity = horizontalVelocity.unit().multiply(horizontalVelocity.magnitude() * friction);
-    die.velocity.x = horizontalVelocity.x;
-    die.velocity.z = horizontalVelocity.z;
-  } else {
-    die.rotation = die.rotation.add(die.velocity.multiply(deltaTime).multiply(0.01).absolute());
-  }
-}
-
-void mouseClicked() {
   for (int i = 0; i < instanceList.size(); i++) {
     Instance instance = instanceList.get(i);
-    if (instance instanceof UIInstance == false) {
+    if (instance instanceof DiePhysicsInstance == false) {
       continue;
     }
-    UIInstance uiInstance = (UIInstance)instance;
-    if (uiInstance.clickable && uiInstance.canClick()) {
-      uiInstance.onClick();
-      break;
-    }
+    PhysicsInstance physicsInstance = (PhysicsInstance)instance;
+    physicsInstance.physicsUpdate(deltaTime);
   }
 }
 
@@ -294,6 +259,14 @@ void drawHomeScreen() {
   fill(200, 200, 200);
   noStroke();
   rect(width / 2, height / 2, width, height);
+
+  // total text
+  int total = 0;
+  for (int i = 0; i < homeDieList.size(); i++) {
+    Die instance = homeDieList.get(i);
+    total += instance.n;
+  }
+  homeDiceTotalText.textString = "Total: " + total;
 }
 
 void drawLaunchCharge() {
@@ -393,13 +366,13 @@ class TextInstance extends UIInstance {
   }
 }
 
-class DieIcon extends UIInstance {
+class Die extends UIInstance {
   int n;
   float size;
   color backgroundColor;
   color dotColor;
 
-  DieIcon(int n, float x, float y, float size, color backgroundColor, color dotColor) {
+  Die(int n, float x, float y, float size, color backgroundColor, color dotColor) {
     super();
     this.n = n;
     this.x = x;
@@ -456,15 +429,20 @@ class PhysicsInstance extends PVInstance {
   PhysicsInstance() {
     super();
   }
+
+  void physicsUpdate(float deltaTime) {}
 }
 
-class Die extends PhysicsInstance {
-  boolean grounded = false;
+class DiePhysicsInstance extends PhysicsInstance {
+  boolean grounded;
+  boolean idle;
   color faceColor;
   color dotColor;
   
-  Die() {
+  DiePhysicsInstance() {
     super();
+    grounded = false;
+    idle = false;
     faceColor = color(255, 255, 255);
     dotColor = color(0, 0, 0);
   }
@@ -518,6 +496,52 @@ class Die extends PhysicsInstance {
     drawDieDots(6, 0, 0, size.average(), dotColor);
     popMatrix();
   }
+
+  void physicsUpdate(float deltaTime) {
+    rotation = rotation.normalize(TWO_PI);
+    velocity.y += GRAVITY * deltaTime;
+    position = position.add(velocity.multiply(deltaTime));
+
+    float boundRadius = size.average() / 2;
+
+    if (position.y >= FLOOR_POSITION - boundRadius) {
+      position.y = FLOOR_POSITION - boundRadius;
+      grounded = true;
+
+      Vector3 error = rotation.divide(HALF_PI).round().multiply(HALF_PI).subtract(rotation);
+      float cut = Math.max(1, Math.max(Math.min(6, velocity.magnitude() / 10), 3) / deltaTick);
+      rotation = rotation.add(error.divide(cut));
+
+      idle = velocity.multiplyVector(new Vector3(1, 0, 1)).magnitude() < DIE_STOP_SPEED_THRESHOLD && velocity.y <= GRAVITY * deltaTime + 1;
+      if (idle) {
+        velocity = new Vector3(0, 0, 0);
+      } else {
+        velocity.y *= -0.3;
+      }
+
+      float friction = 1 / (1 + ((deltaTime * SIMULATION_RATE) * 0.3));
+      velocity.x *= friction;
+      velocity.z *= friction;
+    } else {
+      rotation = rotation.add(velocity.multiply(deltaTime).multiply(0.01).absolute());
+      grounded = false;
+      idle = false;
+    }
+  }
+}
+
+void mouseClicked() {
+  for (int i = 0; i < instanceList.size(); i++) {
+    Instance instance = instanceList.get(i);
+    if (instance instanceof UIInstance == false) {
+      continue;
+    }
+    UIInstance uiInstance = (UIInstance)instance;
+    if (uiInstance.clickable && uiInstance.canClick()) {
+      uiInstance.onClick();
+      break;
+    }
+  }
 }
 
 class CameraInstance extends PVInstance {
@@ -536,7 +560,7 @@ class CameraInstance extends PVInstance {
     } else {
       centerVelocity = center.subtract(pcenter).divide(deltaSeconds);
     }
-    if (die.velocity.magnitude() <= DIE_STOP_SPEED_THRESHOLD && die.grounded) {
+    if (die.idle) {
       Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(seconds), 300 + 200 * (float)Math.sin(seconds), 1000 * (float)Math.cos(seconds));
       position = position.add(center.subtract(position).subtract(goalPosition).divide(Math.max(1, 10 / deltaTick)));
     } else {
@@ -574,6 +598,14 @@ class Vector3 {
 
   Vector3 divide(float scalar) {
     return new Vector3(x / scalar, y / scalar, z / scalar);
+  }
+
+  Vector3 addVector(Vector3 otherVector) {
+    return new Vector3(x + otherVector.x, y + otherVector.y, z + otherVector.z);
+  }
+
+  Vector3 multiplyVector(Vector3 otherVector) {
+    return new Vector3(x * otherVector.x, y * otherVector.y, z * otherVector.z);
   }
 
   Vector3 normalize(float max) {
