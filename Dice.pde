@@ -139,8 +139,8 @@ void physicsStep(float deltaTime) {
   if (die.position.y >= FLOOR_POSITION - boundRadius) {
     if (die.grounded) {
       Vector3 error = die.rotation.divide(HALF_PI).round().multiply(HALF_PI).subtract(die.rotation);
-      float smooth = Math.max(Math.min(6, die.velocity.magnitude() / 10), 3);
-      die.rotation = die.rotation.add(error.divide(smooth));
+      float cut = Math.max(Math.min(6, die.velocity.magnitude() / 10), 3) / deltaTick;
+      die.rotation = die.rotation.add(error.divide(cut));
       if (die.velocity.magnitude() < DIE_STOP_SPEED_THRESHOLD) {
         die.velocity = new Vector3(0, 0, 0);
       }
@@ -183,6 +183,7 @@ void drawWorld() {
   pushMatrix();
   translateWorld(cameraInstance.position);
   lights();
+  directionalLight(128, 128, 128, -1, 0.2, -1);
   lightFalloff(0.5, 0.00015, 0.0);
   popMatrix();
 
