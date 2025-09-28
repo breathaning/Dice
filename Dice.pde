@@ -2,8 +2,9 @@
 // beige rgb(255, 236, 207)
 float FLOAT_PRECISION = 1.1920929E-7;
 
-int FRAME_RATE = 60;
-float FRAME_INTERVAL = 1.0 / FRAME_RATE;
+int FRAME_RATE = 480;
+int SIMULATION_RATE = 60;
+float SIMULATION_INTERVAL = 1.0 / SIMULATION_RATE;
 float GRAVITY = 981;
 float FLOOR_POSITION = 500;
 float DIE_CONTROL_MAX_VELOCITY = 2500;
@@ -52,6 +53,7 @@ boolean pmousePressed = mousePressed;
 int pmillis = -1;
 float seconds = 0;
 float deltaSeconds = 0;
+float deltaTick = 0;
 
 void settings() {
   size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P3D);
@@ -96,6 +98,7 @@ void updateTime() {
   }
   seconds = millis() / 1000.0;
   deltaSeconds = (millis() - pmillis) / 1000.0;
+  deltaTick = deltaSeconds * SIMULATION_RATE;
   pmillis = millis();
 }
 
@@ -150,8 +153,8 @@ void physicsStep(float deltaTime) {
     die.position.y = FLOOR_POSITION - boundRadius;
     
     Vector3 horizontalVelocity = new Vector3(die.velocity.x, 0, die.velocity.z);
-    float friction = 1 / (1 + ((deltaTime / FRAME_INTERVAL) * 0.3));
-    horizontalVelocity = horizontalVelocity.unit().multiply(horizontalVelocity.magnitude() *friction);
+    float friction = 1 / (1 + ((deltaTime * SIMULATION_RATE) * 0.3));
+    horizontalVelocity = horizontalVelocity.unit().multiply(horizontalVelocity.magnitude() * friction);
     die.velocity.x = horizontalVelocity.x;
     die.velocity.z = horizontalVelocity.z;
   } else {
@@ -275,7 +278,8 @@ void drawLaunchCharge() {
   fill(255, 255, 255, 150);
   for (int i = 1; i <= amt; i++) {
     float size = sizeMultiplier * (i * 2 + 5);
-    ellipse(width / 2 + dmouseX * (float)Math.pow((float)i / amt, exp), height / 2 + dmouseY * (float)Math.pow((float)i / amt, exp), size, size);
+    float positionScale = (float)Math.pow((float)i / amt, exp);
+    ellipse(width / 2 + dmouseX * positionScale, height / 2 + dmouseY * positionScale, size, size);
   }
 }
 
@@ -486,7 +490,7 @@ class CameraInstance extends PVInstance {
 
   void update() {
     Vector3 pcenter = center.copy();
-    center = center.add(die.position.subtract(center).divide(20));
+    center = center.add(die.position.subtract(center).divide(20 / deltaTick));
     Vector3 centerVelocity;
     if (deltaSeconds == 0) {
       centerVelocity = new Vector3(0, 0, 0);
@@ -495,10 +499,10 @@ class CameraInstance extends PVInstance {
     }
     if (die.velocity.magnitude() <= DIE_STOP_SPEED_THRESHOLD && die.grounded) {
       Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(seconds), 300 + 200 * (float)Math.sin(seconds), 1000 * (float)Math.cos(seconds));
-      position = position.add(center.subtract(position).subtract(goalPosition).divide(10));
+      position = position.add(center.subtract(position).subtract(goalPosition).divide(10 / deltaTick));
     } else {
       Vector3 goalPosition = centerVelocity.unit().multiply(1000).add(new Vector3(0, 250, 0));
-      position = position.add(center.subtract(position).subtract(goalPosition).divide(25));
+      position = position.add(center.subtract(position).subtract(goalPosition).divide(25 / deltaTick));
     }
     if (position.y > FLOOR_POSITION - 25) {
       position.y = FLOOR_POSITION - 25;
