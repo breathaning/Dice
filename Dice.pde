@@ -14,9 +14,6 @@ float DIE_LAUNCH_MIN_POWER = 800;
 float DIE_LAUNCH_MOUSE_DEADZONE = 10;
 float DIE_LAUNCH_MOUSE_STARTZONE = 100;
 
-int INITIAL_CANVAS_WIDTH = 750;
-int INITIAL_CANVAS_HEIGHT = 750;
-
 ArrayList<Instance> instanceList = new ArrayList<Instance>();
 
 boolean gameOn = false;
@@ -63,12 +60,9 @@ float seconds = 0;
 float deltaSeconds = 0;
 float deltaTick = 0;
 
-void settings() {
-  size(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT, P3D);
-  smooth(4);
-}
-
 void setup() {
+  size(750, 750, P3D);
+  smooth(4);
   rectMode(CENTER);
   frameRate(FRAME_RATE);
 }
@@ -335,9 +329,7 @@ class UIInstance extends Instance {
     return false;
   }
 
-  void onClick() {
-    System.out.println("UIInstance clicked");
-  }
+  void onClick() {}
 }
 
 class TextInstance extends UIInstance {
@@ -509,7 +501,7 @@ class DiePhysicsInstance extends PhysicsInstance {
       grounded = true;
 
       Vector3 error = rotation.divide(HALF_PI).round().multiply(HALF_PI).subtract(rotation);
-      float cut = Math.max(1, Math.max(Math.min(6, velocity.magnitude() / 10), 3) / deltaTick);
+      float cut = Math.max(1, Math.max(Math.min(6, velocity.multiplyVector(new Vector3(1, 0, 1)).magnitude() / 10), 3) / deltaTick);
       rotation = rotation.add(error.divide(cut));
 
       idle = velocity.multiplyVector(new Vector3(1, 0, 1)).magnitude() < DIE_STOP_SPEED_THRESHOLD && velocity.y <= GRAVITY * deltaTime + 1;
@@ -653,7 +645,7 @@ void startGame() {
   die.velocity = new Vector3(0, 0, 0);
   die.rotation = new Vector3((float)Math.random() * TWO_PI, (float)Math.random() * TWO_PI, (float)Math.random() * TWO_PI);
   cameraInstance.center = die.position;
-  cameraInstance.position = new Vector3(0, -6000, -3000);
+  cameraInstance.position = new Vector3(0, -6000, -5000);
   launchStarted = false;
   gameOn = true;
 }
