@@ -10,6 +10,9 @@ float FLOOR_POSITION = 500;
 float DIE_CONTROL_MAX_VELOCITY = 2500;
 float DIE_STOP_SPEED_THRESHOLD = 0.1;
 float DIE_LAUNCH_MAX_POWER = 1600;
+float DIE_LAUNCH_MIN_POWER = 800;
+float DIE_LAUNCH_MOUSE_DEADZONE = 10;
+float DIE_LAUNCH_MOUSE_STARTZONE = 100;
 
 int INITIAL_CANVAS_WIDTH = 750;
 int INITIAL_CANVAS_HEIGHT = 750;
@@ -21,6 +24,7 @@ boolean gameOn = false;
 // game objects
 Die die = new Die();
 CameraInstance cameraInstance = new CameraInstance();
+float dieLaunchPower = 0;
 
 // home screen
 ArrayList<UIInstance> homeInstanceList = new ArrayList<UIInstance>();
@@ -47,8 +51,10 @@ ArrayList<UIInstance> homeDiceList = new ArrayList<UIInstance>();
   }
 }
 
+boolean launchStarted = false;
 
-boolean pmousePressed = mousePressed;
+float dmouseX = width / 2.0;
+float dmouseY = height / 2.0;
 
 int pmillis = -1;
 float seconds = 0;
@@ -65,24 +71,10 @@ void setup() {
   frameRate(FRAME_RATE);
 }
 
-void mouseClicked() {
-  for (int i = 0; i < instanceList.size(); i++) {
-    Instance instance = instanceList.get(i);
-    if (instance instanceof UIInstance == false) {
-      continue;
-    }
-    UIInstance uiInstance = (UIInstance)instance;
-    if (uiInstance.clickable && uiInstance.canClick()) {
-      uiInstance.onClick();
-      break;
-    }
-  }
-}
-
 void draw() {
+  updateMouse();
   updateTime();
   updateInstances();
-  handleInput();
 
   if (gameOn) {
     physicsStep(deltaSeconds);
@@ -90,6 +82,11 @@ void draw() {
   
   drawWorld();
   drawUI();
+}
+
+void updateMouse() {
+  dmouseX = mouseX - ((float)width / 2);
+  dmouseY = mouseY - ((float)height / 2);
 }
 
 void updateTime() {
@@ -107,25 +104,6 @@ void updateInstances() {
   for (int i = 0; i < startSize; i++) {
     instanceList.get(i - (startSize - instanceList.size())).update();
   }
-}
-
-void handleInput() {
-  boolean mouseReleased = pmousePressed && !mousePressed;
-
-  if (mouseReleased && gameOn) {
-    float dmouseX = mouseX - ((float)width / 2);
-    float dmouseY = mouseY - ((float)height / 2);
-    float power = Math.min(DIE_LAUNCH_MAX_POWER, 4 * (float)Math.sqrt(dmouseX * dmouseX + dmouseY * dmouseY));
-
-    float cameraHorizontalAngle = (float)Math.atan2(cameraInstance.center.z - cameraInstance.position.z, cameraInstance.center.x - cameraInstance.position.x);
-    float mouseAngle = (float)Math.atan2(dmouseY, dmouseX) - HALF_PI;
-    float horizontalAngle = cameraHorizontalAngle + mouseAngle;
-    float verticalAngle = radians(70) * -(power / DIE_LAUNCH_MAX_POWER);
-    
-    die.velocity = new Vector3((float)Math.cos(horizontalAngle), (float)Math.sin(verticalAngle), (float)Math.sin(horizontalAngle)).multiply(power);
-  }
-
-  pmousePressed = mousePressed;
 }
 
 void physicsStep(float deltaTime) {
@@ -159,6 +137,53 @@ void physicsStep(float deltaTime) {
     die.velocity.z = horizontalVelocity.z;
   } else {
     die.rotation = die.rotation.add(die.velocity.multiply(deltaTime).multiply(0.01).absolute());
+  }
+}
+
+void mouseClicked() {
+  for (int i = 0; i < instanceList.size(); i++) {
+    Instance instance = instanceList.get(i);
+    if (instance instanceof UIInstance == false) {
+      continue;
+    }
+    UIInstance uiInstance = (UIInstance)instance;
+    if (uiInstance.clickable && uiInstance.canClick()) {
+      uiInstance.onClick();
+      break;
+    }
+  }
+}
+
+void mousePressed() {
+  if (gameOn && Math.hypot(dmouseX, dmouseY) <= DIE_LAUNCH_MOUSE_STARTZONE) {
+    launchStarted = true;
+    setLaunchPower();
+  }
+}
+
+void mouseDragged() {
+  if (gameOn && launchStarted) {
+    setLaunchPower();
+  }
+}
+
+void mouseReleased() {
+  if (gameOn && dieLaunchPower != 0) {
+    launchStarted = false;
+    float cameraHorizontalAngle = (float)Math.atan2(cameraInstance.center.z - cameraInstance.position.z, cameraInstance.center.x - cameraInstance.position.x);
+    float mouseAngle = (float)Math.atan2(dmouseY, dmouseX) - HALF_PI;
+    float horizontalAngle = cameraHorizontalAngle + mouseAngle;
+    float verticalAngle = radians(70) * -(dieLaunchPower / DIE_LAUNCH_MAX_POWER);
+    
+    die.velocity = new Vector3((float)Math.cos(horizontalAngle), (float)Math.sin(verticalAngle), (float)Math.sin(horizontalAngle)).multiply(dieLaunchPower);
+  }
+}
+
+void setLaunchPower() {
+  if ((dmouseX != 0 || dmouseY != 0) && Math.hypot(dmouseX, dmouseY) >= DIE_LAUNCH_MOUSE_DEADZONE) {
+    dieLaunchPower = DIE_LAUNCH_MIN_POWER +  Math.min(DIE_LAUNCH_MAX_POWER, 4 * (float)Math.hypot(dmouseX, dmouseY));
+  } else {
+    dieLaunchPower = 0;
   }
 }
 
@@ -270,25 +295,28 @@ void drawHomeScreen() {
 }
 
 void drawLaunchCharge() {
-  if (mousePressed == false) {
-    return;
-  }
-  Vector3 dmouseVector = new Vector3(mouseX - (width / 2), mouseY - (height / 2), 0);
-  float bound = Math.min(INITIAL_CANVAS_WIDTH, INITIAL_CANVAS_HEIGHT) * 0.5 * 0.9;
-  if (dmouseVector.magnitude() > bound) {
-    dmouseVector = dmouseVector.unit().multiply(bound);
-  }
-  float dmouseX = dmouseVector.x;
-  float dmouseY = dmouseVector.y;
-  int amt = 10;
-  float exp = 0.8;
-  float sizeMultiplier = 1.5 - ((float)Math.sqrt(dmouseX * dmouseX + dmouseY * dmouseY) / (float)Math.sqrt(width * width / 4 + height * height / 4));
-  noStroke();
-  fill(255, 255, 255, 150);
-  for (int i = 1; i <= amt; i++) {
-    float size = sizeMultiplier * (i * 2 + 5);
-    float positionScale = (float)Math.pow((float)i / amt, exp);
-    ellipse(width / 2 + dmouseX * positionScale, height / 2 + dmouseY * positionScale, size, size);
+  if (mousePressed && launchStarted) {
+    float offsetX = dmouseX;
+    float offsetY = dmouseY;
+    float magnitude = (float)Math.hypot(offsetX, offsetY);
+    float bound = Math.min(width, height) / 2 * 0.9;
+    if (magnitude > bound) {
+      offsetX = offsetX / magnitude * bound;
+      offsetY = offsetY / magnitude * bound;
+      magnitude = bound;
+    }
+
+    int amt = 10;
+    float exp = 0.8;
+    float sizeMultiplier = 1.25 - (magnitude / bound);
+
+    noStroke();
+    fill(255, 255, 255, 150);
+    for (int i = 1; i <= amt; i++) {
+      float size = sizeMultiplier * (i * 2) + 5;
+      float positionScale = (float)Math.pow((float)i / amt, exp);
+      ellipse(width / 2 + offsetX * positionScale, height / 2 + offsetY * positionScale, size, size);
+    }
   }
 }
 
@@ -592,6 +620,7 @@ void startGame() {
   die.rotation = new Vector3((float)Math.random() * TWO_PI, (float)Math.random() * TWO_PI, (float)Math.random() * TWO_PI);
   cameraInstance.center = die.position;
   cameraInstance.position = new Vector3(0, -6000, -3000);
+  launchStarted = false;
   gameOn = true;
 }
 
