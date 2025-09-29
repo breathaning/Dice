@@ -313,7 +313,11 @@ void drawLaunchCharge() {
     float sizeMultiplier = 1.25 - (magnitude / bound);
 
     noStroke();
-    fill(255, 255, 255, 150);
+    if (dieLaunchPower == 0) {
+      fill(255, 0, 0, 100);
+    } else {
+      fill(255, 255, 255, 150);
+    }
     for (int i = 1; i <= amt; i++) {
       float size = sizeMultiplier * (i * 2) + 5;
       float positionScale = (float)Math.pow((float)i / amt, exp);
