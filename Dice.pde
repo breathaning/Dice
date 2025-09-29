@@ -23,7 +23,7 @@ DiePhysicsInstance die = new DiePhysicsInstance();
 CameraInstance cameraInstance = new CameraInstance();
 float dieLaunchPower = 0;
 boolean dieLaunched = false;
-float correspondingDieButton = -1;
+int correspondingDieButton = -1;
 
 // home screen
 ArrayList<UIInstance> homeInstanceList = new ArrayList<UIInstance>();
