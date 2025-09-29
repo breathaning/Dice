@@ -544,7 +544,7 @@ class DiePhysicsInstance extends PhysicsInstance {
         velocity.y *= -0.3;
       }
 
-      float friction = Math.max(0, Math.pow(0.7, deltaTick));
+      float friction = (float)Math.max(0, Math.pow(0.7, deltaTick));
       velocity.x *= friction;
       velocity.z *= friction;
     } else {
