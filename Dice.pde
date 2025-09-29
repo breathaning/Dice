@@ -64,7 +64,7 @@ float deltaTick = 0;
 
 void setup() {
   size(750, 750, P3D);
-  smooth(4);
+  smooth(2);
   rectMode(CENTER);
   frameRate(FRAME_RATE);
 }
