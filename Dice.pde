@@ -22,6 +22,8 @@ boolean gameOn = false;
 DiePhysicsInstance die = new DiePhysicsInstance();
 CameraInstance cameraInstance = new CameraInstance();
 float dieLaunchPower = 0;
+boolean dieLaunched = false;
+float correspondingDieButton = -1;
 
 // home screen
 ArrayList<UIInstance> homeInstanceList = new ArrayList<UIInstance>();
@@ -37,9 +39,9 @@ TextInstance homeDiceTotalText = new TextInstance("Total: 0", 0, 300, 32, color(
   homeDieList.add(new Die(0, 75, -150, 100, color(255, 255, 0), color(128, 128, 0)));
   homeDieList.add(new Die(0, 225, -150, 100, color(0, 255, 0), color(0, 128, 0)));
   // middle row
-  homeDieList.add(new Die(0, -150, 0, 100, color(0, 0, 255), color(0, 0, 128)));
-  homeDieList.add(new Die(0, 0, 0, 100, color(64, 0, 172), color(32, 0, 86)));
-  homeDieList.add(new Die(0, 150, 0, 100, color(128, 0, 128), color(64, 0, 64)));
+  homeDieList.add(new Die(0, -150, 0, 100, color(0, 0, 255), color(128, 192, 255)));
+  homeDieList.add(new Die(0, 0, 0, 100, color(64, 0, 128), color(192, 128, 255)));
+  homeDieList.add(new Die(0, 150, 0, 100, color(128, 0, 128), color(255, 192, 255)));
   // bottom row
   homeDieList.add(new Die(0, -75, 150, 100, color(255, 255, 255), color(0, 0, 0)));
   homeDieList.add(new Die(0, 75, 150, 100, color(0, 0, 0), color(255, 255, 255)));
@@ -74,6 +76,7 @@ void draw() {
 
   if (gameOn) {
     physicsStep(deltaSeconds);
+    checkDieLanded();
   }
   
   drawWorld();
@@ -113,10 +116,30 @@ void physicsStep(float deltaTime) {
   }
 }
 
+void checkDieLanded() {
+  if (die.idle && dieLaunched) {
+    int face = die.getTopFace();
+    homeDieList.get(correspondingDieButton).n = face;
+    endGame();
+  }
+}
+
 void mousePressed() {
-  if (gameOn && Math.hypot(dmouseX, dmouseY) <= DIE_LAUNCH_MOUSE_STARTZONE) {
+  if (gameOn && Math.hypot(dmouseX, dmouseY) <= DIE_LAUNCH_MOUSE_STARTZONE && dieLaunched == false && die.idle == true) {
     launchStarted = true;
     setLaunchPower();
+  }
+
+  for (int i = 0; i < instanceList.size(); i++) {
+    Instance instance = instanceList.get(i);
+    if (instance instanceof UIInstance == false) {
+      continue;
+    }
+    UIInstance uiInstance = (UIInstance)instance;
+    if (uiInstance.clickable && uiInstance.canClick()) {
+      uiInstance.onClick();
+      break;
+    }
   }
 }
 
@@ -129,12 +152,16 @@ void mouseDragged() {
 void mouseReleased() {
   if (gameOn && launchStarted) {
     launchStarted = false;
-    float cameraHorizontalAngle = (float)Math.atan2(cameraInstance.center.z - cameraInstance.position.z, cameraInstance.center.x - cameraInstance.position.x);
-    float mouseAngle = (float)Math.atan2(dmouseY, dmouseX) - HALF_PI;
-    float horizontalAngle = cameraHorizontalAngle + mouseAngle;
-    float verticalAngle = radians(70) * -(dieLaunchPower / DIE_LAUNCH_MAX_POWER);
     
-    die.velocity = new Vector3((float)Math.cos(horizontalAngle), (float)Math.sin(verticalAngle), (float)Math.sin(horizontalAngle)).multiply(dieLaunchPower);
+    if (dieLaunchPower > 0) {
+      float cameraHorizontalAngle = (float)Math.atan2(cameraInstance.center.z - cameraInstance.position.z, cameraInstance.center.x - cameraInstance.position.x);
+      float mouseAngle = (float)Math.atan2(dmouseY, dmouseX) - HALF_PI;
+      float horizontalAngle = cameraHorizontalAngle + mouseAngle;
+      float verticalAngle = radians(70) * -(dieLaunchPower / DIE_LAUNCH_MAX_POWER);
+      
+      dieLaunched = true;
+      die.velocity = new Vector3((float)Math.cos(horizontalAngle), (float)Math.sin(verticalAngle), (float)Math.sin(horizontalAngle)).multiply(dieLaunchPower);
+    }
   }
 }
 
@@ -150,18 +177,24 @@ void setLaunchPower() {
 
 // draw functions
 void drawWorld() {
+  if (gameOn == false) {
+    return;
+  }
   hint(ENABLE_DEPTH_TEST);
   float eyeX = cameraInstance.position.x;
   float eyeY = cameraInstance.position.y;
   float eyeZ = cameraInstance.position.z;
-  if (eyeX == cameraInstance.center.x) {
-    eyeX += FLOAT_PRECISION;
+  if (Math.abs(eyeX - cameraInstance.center.x) < 5) {
+    int eyeSign = mathSign(eyeX - cameraInstance.center.x);
+    eyeX = cameraInstance.center.x + 5 * eyeSign;
   }
-  if (eyeY == cameraInstance.center.y) {
-    eyeY += FLOAT_PRECISION;
+  if (Math.abs(eyeY - cameraInstance.center.y) < 5) {
+    int eyeSign = mathSign(eyeY - cameraInstance.center.y);
+    eyeY = cameraInstance.center.y + 5 * eyeSign;
   }
-  if (eyeZ == cameraInstance.center.z) {
-    eyeZ += FLOAT_PRECISION;
+  if (Math.abs(eyeZ - cameraInstance.center.z) < 5) {
+    int eyeSign = mathSign(eyeZ - cameraInstance.center.z);
+    eyeZ = cameraInstance.center.z + 5 * eyeSign;
   }
   pushMatrix();
   camera(
@@ -202,7 +235,7 @@ void drawGround() {
   strokeWeight(12);
   translateWorld(new Vector3(cameraInstance.position.x, FLOOR_POSITION + 16, cameraInstance.position.z));
   rotateX(radians(90));
-  float scale = Math.min(Math.max(width, height) * 5.6, 8000);
+  float scale = Math.min(Math.max(width, height) * 5.6, 8181);
   ellipse(0, 0, scale, scale);
   popMatrix();
 }
@@ -394,14 +427,10 @@ class Die extends UIInstance {
     if (gameOn) {
       return;
     }
-    for (int i = 0; i < homeInstanceList.size(); i++) {
-      UIInstance instance = homeInstanceList.get(i);
-      instance.clickable = false;
-      instance.visible = false;
-    }
-    startGame();
+    correspondingDieButton = homeDieList.indexOf(this);
     die.faceColor = backgroundColor;
     die.dotColor = dotColor;
+    startGame();
   }
 }
 
@@ -500,7 +529,7 @@ class DiePhysicsInstance extends PhysicsInstance {
       position.y = FLOOR_POSITION - boundRadius;
       grounded = true;
 
-      Vector3 error = rotation.divide(HALF_PI).round().multiply(HALF_PI).subtract(rotation);
+      Vector3 error = getUprightRotation().subtract(rotation);
       float cut = Math.max(1, Math.max(Math.min(6, velocity.multiplyVector(new Vector3(1, 0, 1)).magnitude() / 10), 3) / deltaTick);
       rotation = rotation.add(error.divide(cut));
 
@@ -520,19 +549,62 @@ class DiePhysicsInstance extends PhysicsInstance {
       idle = false;
     }
   }
-}
 
-void mouseClicked() {
-  for (int i = 0; i < instanceList.size(); i++) {
-    Instance instance = instanceList.get(i);
-    if (instance instanceof UIInstance == false) {
-      continue;
+  Vector3 getUprightRotation() {
+    return rotation.divide(HALF_PI).round().multiply(HALF_PI);
+  }
+
+  int getTopFace() {
+    Vector3 uprightRotation = getUprightRotation().normalize(TWO_PI);
+    Vector3 lookVector = new Vector3(
+      (float)(Math.cos(uprightRotation.y) * Math.cos(uprightRotation.x)),
+      (float)(Math.sin(uprightRotation.x)),
+      (float)(Math.sin(uprightRotation.y) * Math.cos(uprightRotation.x))
+    ).round();
+    boolean exceptionCase = (mathFuzzyEq((uprightRotation.x - HALF_PI) % PI, 0, 1) || mathFuzzyEq((uprightRotation.x - HALF_PI) % PI, PI, 1)) && (mathFuzzyEq((uprightRotation.y - HALF_PI) % PI, 0, 1) || mathFuzzyEq((uprightRotation.y - HALF_PI) % PI, PI, 1));
+    if (lookVector.x == 1 || lookVector.x == -1 || lookVector.z == 1 || lookVector.z == -1 || exceptionCase) {
+      float angle = uprightRotation.z;
+      if ((lookVector.x != 0 && mathFuzzyEq(uprightRotation.x, PI, 1)) || (lookVector.z != 0 && mathFuzzyEq(uprightRotation.x, PI, 1))) {
+        angle = mathNormalize(PI + angle, TWO_PI);
+      }
+      if (exceptionCase) {
+        angle = mathNormalize(HALF_PI + angle, TWO_PI);
+        if (mathFuzzyEq(uprightRotation.x, uprightRotation.y, 1) == false) {
+          angle = mathNormalize(PI + angle, TWO_PI);
+        }
+      }
+      if (mathFuzzyEq(angle, 0, 1)) {
+        return 3;
+      }
+      if (mathFuzzyEq(angle, HALF_PI, 1)) {
+        return 5;
+      }
+      if (mathFuzzyEq(angle, PI, 1)) {
+        return 4;
+      }
+      if (mathFuzzyEq(angle, PI + HALF_PI, 1)) {
+        return 2;
+      }
     }
-    UIInstance uiInstance = (UIInstance)instance;
-    if (uiInstance.clickable && uiInstance.canClick()) {
-      uiInstance.onClick();
-      break;
+    if (lookVector.y == 1 || lookVector.y == -1) {
+      float angle = uprightRotation.y;
+      if (mathFuzzyEq(uprightRotation.x, PI + HALF_PI, 1)) {
+        angle = mathNormalize(PI - angle, TWO_PI);
+      }
+      if (mathFuzzyEq(angle, 0, 1)) {
+        return 1;
+      }
+      if (mathFuzzyEq(angle, HALF_PI, 1)) {
+        return 5;
+      }
+      if (mathFuzzyEq(angle, PI, 1)) {
+        return 6;
+      }
+      if (mathFuzzyEq(angle, PI + HALF_PI, 1)) {
+        return 2;
+      }
     }
+    return 0;
   }
 }
 
@@ -600,8 +672,8 @@ class Vector3 {
     return new Vector3(x * otherVector.x, y * otherVector.y, z * otherVector.z);
   }
 
-  Vector3 normalize(float max) {
-    return new Vector3(x % max, y % max, z % max);
+  Vector3 normalize(float range) {
+    return new Vector3(mathNormalize(x, range), mathNormalize(y, range), mathNormalize(z, range));
   }
 
   Vector3 inverse() {
@@ -639,6 +711,13 @@ class Vector3 {
 
 // utility functions
 void startGame() {
+  for (int i = 0; i < homeInstanceList.size(); i++) {
+    UIInstance instance = homeInstanceList.get(i);
+    instance.clickable = false;
+    instance.visible = false;
+  }
+
+  dieLaunched = false;
   die.position.x = 0;
   die.position.y = die.size.magnitude();
   die.position.z = 0;
@@ -651,7 +730,30 @@ void startGame() {
 }
 
 void endGame() {
+  for (int i = 0; i < homeInstanceList.size(); i++) {
+    UIInstance instance = homeInstanceList.get(i);
+    instance.clickable = true;
+    instance.visible = true;
+  }
   gameOn = false;
+}
+
+int mathSign(float n) {
+  if (n == 0) {
+    return 0;
+  }
+  return (int)(n / Math.abs(n));
+}
+
+boolean mathFuzzyEq(float a, float b, float precision) {
+  return Math.abs(a - b) <= precision;
+}
+
+float mathNormalize(float n, float range) {
+  if (n < 0) {
+    return range - (Math.abs(n) % range);
+  }
+  return n % range;
 }
 
 void translateWorld(Vector3 translation) {
