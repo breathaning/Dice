@@ -13,6 +13,7 @@ float DIE_LAUNCH_MAX_POWER = 1600;
 float DIE_LAUNCH_MIN_POWER = 800;
 float DIE_LAUNCH_MOUSE_DEADZONE = 150;
 float DIE_LAUNCH_MOUSE_STARTZONE = 100;
+float DIE_LAND_STALL_DURATION_SECONDS = 4;
 
 ArrayList<Instance> instanceList = new ArrayList<Instance>();
 
@@ -24,6 +25,7 @@ CameraInstance cameraInstance = new CameraInstance();
 float dieLaunchPower = 0;
 boolean dieLaunched = false;
 int correspondingDieButton = -1;
+float dieLandSeconds = -1;
 
 // home screen
 ArrayList<UIInstance> homeInstanceList = new ArrayList<UIInstance>();
@@ -76,7 +78,7 @@ void draw() {
 
   if (gameOn) {
     physicsStep(deltaSeconds);
-    checkDieLanded();
+    checkDieRolled();
   }
   
   drawWorld();
@@ -116,10 +118,13 @@ void physicsStep(float deltaTime) {
   }
 }
 
-void checkDieLanded() {
-  if (die.idle && dieLaunched) {
+void checkDieRolled() {
+  if (die.idle && dieLaunched && dieLandSeconds == -1) {
     int face = die.getTopFace();
     homeDieList.get(correspondingDieButton).n = face;
+    dieLandSeconds = seconds;
+  }
+  if (dieLandSeconds != -1 && seconds > dieLandSeconds + DIE_LAND_STALL_DURATION_SECONDS) {
     endGame();
   }
 }
@@ -629,7 +634,13 @@ class CameraInstance extends PVInstance {
       centerVelocity = center.subtract(pcenter).divide(deltaSeconds);
     }
     if (die.idle) {
-      Vector3 goalPosition = new Vector3(1000 * (float)Math.sin(seconds), 300 + 200 * (float)Math.sin(seconds), 1000 * (float)Math.cos(seconds));
+      float radius;
+      if (dieLaunched) {
+        radius = 250;
+      } else {
+        radius = 1000;
+      }
+      Vector3 goalPosition = new Vector3(radius * (float)Math.sin(seconds), 300 + 200 * (float)Math.sin(seconds), radius * (float)Math.cos(seconds));
       position = position.add(center.subtract(position).subtract(goalPosition).divide(Math.max(1, 10 / deltaTick)));
     } else {
       Vector3 goalPosition = centerVelocity.unit().multiply(1000).add(new Vector3(0, 250, 0));
@@ -721,6 +732,7 @@ void startGame() {
     instance.visible = false;
   }
 
+  dieLandSeconds = -1;
   dieLaunched = false;
   die.position.x = 0;
   die.position.y = die.size.magnitude();
