@@ -28,7 +28,7 @@ int correspondingDieButton = -1;
 float dieLandSeconds = -1;
 
 // play ui
-TextInstance diceRollText = new TextInstance("roll text", 0, 300, 48, color(255, 255, 255));
+TextInstance diceRollText = new TextInstance("roll text", 0, 300, 48, color(255, 255, 255)); // unused
 {
   diceRollText.visible = false;
 }
@@ -129,17 +129,23 @@ void checkDieRolled() {
     int face = die.getTopFace();
     homeDieList.get(correspondingDieButton).n = face;
     dieLandSeconds = seconds;
-    diceRollText.visible = true;
+    //diceRollText.visible = true;
 
     int r = (int)(Math.random() * 4);
+    String textString;
     if (r == 0) {
-      diceRollText.textString = "Hooray! You rolled a " + face;
+      textString = "Hooray! You rolled a " + face;
     } else if (r == 1) {
-      diceRollText.textString = "Wow! You rolled a " + face;
+      textString = "Wow! You rolled a " + face;
     } else if (r == 2) {
-      diceRollText.textString = "Terrific! You got a " + face;
+      textString = "Terrific! You got a " + face;
     } else {
-      diceRollText.textString = "You rolled a " + face + ". Congrats!";
+      textString = "You rolled a " + face + ". Congrats!";
+    }
+    try {
+      setFooter(textString);
+    } catch(Exception e) {
+
     }
   }
   if (dieLandSeconds != -1 && seconds > dieLandSeconds + DIE_LAND_STALL_DURATION_SECONDS) {
