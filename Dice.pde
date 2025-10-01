@@ -27,10 +27,16 @@ boolean dieLaunched = false;
 int correspondingDieButton = -1;
 float dieLandSeconds = -1;
 
+// play ui
+TextInstance diceRollText = new TextInstance("roll text", 0, 300, 48, color(255, 255, 255));
+{
+  diceRollText.visible = false;
+}
+
 // home screen
 ArrayList<UIInstance> homeInstanceList = new ArrayList<UIInstance>();
 ArrayList<Die> homeDieList = new ArrayList<Die>();
-TextInstance homeDiceTotalText = new TextInstance("Total: 0", 0, 300, 32, color(0, 0, 0));  
+TextInstance homeDiceTotalText = new TextInstance("Total: 0", 0, 300, 32, color(0, 0, 0));
 {
   // text
   homeInstanceList.add(new TextInstance("Click the dice to roll them!", 0, -300, 32, color(0, 0, 0)));
@@ -123,6 +129,18 @@ void checkDieRolled() {
     int face = die.getTopFace();
     homeDieList.get(correspondingDieButton).n = face;
     dieLandSeconds = seconds;
+    diceRollText.visible = true;
+
+    int r = (int)(Math.random() * 4);
+    if (r == 0) {
+      diceRollText.textString = "Hooray! You rolled a " + face;
+    } else if (r == 1) {
+      diceRollText.textString = "Wow! You rolled a " + face;
+    } else if (r == 2) {
+      diceRollText.textString = "Terrific! You got a " + face;
+    } else {
+      diceRollText.textString = "You rolled a " + face + ". Congrats!";
+    }
   }
   if (dieLandSeconds != -1 && seconds > dieLandSeconds + DIE_LAND_STALL_DURATION_SECONDS) {
     endGame();
@@ -468,6 +486,7 @@ class DiePhysicsInstance extends PhysicsInstance {
   boolean idle;
   color faceColor;
   color dotColor;
+  float lastFire;
   
   DiePhysicsInstance() {
     super();
@@ -475,6 +494,7 @@ class DiePhysicsInstance extends PhysicsInstance {
     idle = false;
     faceColor = color(255, 255, 255);
     dotColor = color(0, 0, 0);
+    lastFire = -1;
   }
   
   void draw() {
@@ -486,7 +506,7 @@ class DiePhysicsInstance extends PhysicsInstance {
     strokeWeight(4);
     translateWorld(position);
     rotateWorld(rotation);
-    boxWorld(this.size);
+    boxWorld(size);
 
     int lift = 1;
     // 1
@@ -531,6 +551,11 @@ class DiePhysicsInstance extends PhysicsInstance {
     rotation = rotation.normalize(TWO_PI);
     velocity.y += GRAVITY * deltaTime;
     position = position.add(velocity.multiply(deltaTime));
+
+    if (velocity.multiplyVector(new Vector3(1, 0, 1)).magnitude() > 1500 && seconds - lastFire > 0.1) {
+      new FireParticle(position);
+      lastFire = seconds;
+    }
 
     float boundRadius = size.average() / 2;
 
@@ -614,6 +639,48 @@ class DiePhysicsInstance extends PhysicsInstance {
       }
     }
     return 0;
+  }
+}
+
+class FireParticle extends PVInstance {
+  Vector3 position;
+  Vector3 rotation;
+  float startSize;
+  color fireColor;
+  float creationSeconds;
+
+  FireParticle(Vector3 position) {
+    this.position = position;
+    this.rotation = new Vector3((float)Math.random() * TWO_PI, (float)Math.random() * TWO_PI, (float)Math.random() * TWO_PI);
+    this.startSize = (float)(Math.random() * 25) + 40;
+    this.creationSeconds = seconds;
+
+    int r = (int)(Math.random() * 4);
+    if (r == 0) {
+      this.fireColor = color(255, 0, 0);
+    } else if (r == 1) {
+      this.fireColor = color(255, 90, 0);
+    } else if (r == 2) {
+      this.fireColor = color(255, 200, 0);
+    } else {
+      this.fireColor = color(255, 230, 10);
+    }
+  }
+
+  void draw() {
+    float age = seconds - creationSeconds;
+    float size = startSize - 25 * age;
+    if (size < 0) {
+      destroy();
+      return;
+    }
+    position = position.add(new Vector3(0, -1, 0).multiply(5).multiply(deltaTick));
+    rotation = rotation.add(new Vector3(1, 1, 1).multiply(0.1).multiply(deltaTick));
+    translateWorld(position);
+    rotateWorld(rotation);
+    fill(fireColor);
+    noStroke();
+    boxWorld(new Vector3(1, 1, 1).multiply(size));
   }
 }
 
@@ -731,6 +798,7 @@ void startGame() {
     instance.clickable = false;
     instance.visible = false;
   }
+  diceRollText.visible = false;
 
   dieLandSeconds = -1;
   dieLaunched = false;
@@ -751,6 +819,7 @@ void endGame() {
     instance.clickable = true;
     instance.visible = true;
   }
+  diceRollText.visible = false;
   gameOn = false;
 }
 
