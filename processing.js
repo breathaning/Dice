@@ -3335,11 +3335,6 @@
     PMatrixStack.prototype.mult = function(matrix) {
       this.matrixStack[this.matrixStack.length - 1].apply(matrix)
     };
-    p.setFooter = function(str) {
-      var $footer = document.getElementById("footer");
-      footer.innerHTML = "";
-      footer.appendChild(document.createTextNode(str));
-    }
     p.split = function(str, delim) {
       return str.split(delim)
     };
@@ -8532,9 +8527,6 @@
           }
           curSketch.attach(processing, defaultScope);
           curSketch.onLoad(processing);
-          if (processing.settings) {
-            processing.settings();
-          }
           if (processing.setup) {
             processing.setup();
             processing.resetMatrix();
@@ -8565,7 +8557,6 @@
 
   function getGlobalMembers() {
     var names = [
-      "setFooter",
       "abs", "acos", "alpha", "ambient", "ambientLight", "append",
       "applyMatrix", "arc", "arrayCopy", "asin", "atan", "atan2", "background", "beginCamera", "beginDraw", "beginShape", "bezier", "bezierDetail", "bezierPoint", "bezierTangent", "bezierVertex", "binary", "blend", "blendColor", "blit_resize", "blue", "box", "breakShape", "brightness", "camera", "ceil", "Character", "color", "colorMode", "concat", "constrain", "copy", "cos", "createFont", "createGraphics", "createImage", "cursor", "curve", "curveDetail", "curvePoint", "curveTangent", "curveTightness", "curveVertex", "day", "degrees", "directionalLight",
       "disableContextMenu", "dist", "draw", "ellipse", "ellipseMode", "emissive", "enableContextMenu", "endCamera", "endDraw", "endShape", "exit", "exp", "expand", "externals", "fill", "filter", "floor", "focused", "frameCount", "frameRate", "frustum", "get", "glyphLook", "glyphTable", "green", "height", "hex", "hint", "hour", "hue", "image", "imageMode", "intersect", "join", "key", "keyCode", "keyPressed", "keyReleased", "keyTyped", "lerp", "lerpColor", "lightFalloff", "lights", "lightSpecular", "line", "link", "loadBytes", "loadFont", "loadGlyphs",
