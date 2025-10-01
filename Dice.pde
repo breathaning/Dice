@@ -652,7 +652,7 @@ class FireParticle extends PVInstance {
   FireParticle(Vector3 position) {
     this.position = position;
     this.rotation = new Vector3((float)Math.random() * TWO_PI, (float)Math.random() * TWO_PI, (float)Math.random() * TWO_PI);
-    this.startSize = (float)(Math.random() * 25) + 40;
+    this.startSize = (float)(Math.random() * 25) + 25;
     this.creationSeconds = seconds;
 
     int r = (int)(Math.random() * 4);
@@ -669,12 +669,12 @@ class FireParticle extends PVInstance {
 
   void draw() {
     float age = seconds - creationSeconds;
-    float size = startSize - 25 * age;
+    float size = startSize - 75 * age;
     if (size < 0) {
       destroy();
       return;
     }
-    position = position.add(new Vector3(0, -1, 0).multiply(5).multiply(deltaTick));
+    position = position.add(new Vector3(0, 1, 0).multiply(10).multiply(deltaTick));
     rotation = rotation.add(new Vector3(1, 1, 1).multiply(0.1).multiply(deltaTick));
     translateWorld(position);
     rotateWorld(rotation);
