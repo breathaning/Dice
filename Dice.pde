@@ -225,7 +225,6 @@ void drawWorld() {
     cameraInstance.center.x, cameraInstance.center.y, cameraInstance.center.z,
     0, 1, 0
   );
-  float fov = PI/3.0;
   pushMatrix();
   translateWorld(cameraInstance.position);
   lights();
@@ -233,7 +232,7 @@ void drawWorld() {
   lightFalloff(0.5, 0.00015, 0.0);
   popMatrix();
 
-  perspective(fov, (float)width/(float)height, 4, 640000);
+  perspective(PI/3.0, (float)width/(float)height, 4, 640000);
   background(135, 206, 235);
   drawGround();
   drawShadow(die.position);
