@@ -33,6 +33,9 @@ TextInstance diceRollText = new TextInstance("roll text", 0, 300, 48, color(255,
   diceRollText.visible = false;
 }
 
+
+
+
 // home screen
 ArrayList<UIInstance> homeInstanceList = new ArrayList<UIInstance>();
 ArrayList<Die> homeDieList = new ArrayList<Die>();
